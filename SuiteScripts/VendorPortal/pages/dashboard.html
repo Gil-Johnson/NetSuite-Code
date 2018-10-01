@@ -1,0 +1,47 @@
+<style>
+    body {
+        color: white;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+    .pull-right {
+        padding-right: 20px;
+    }
+    hr {
+        padding-bottom: 50px;
+    }
+    .errorMessage {
+        color: #b94a48;
+        padding-bottom: 20px;
+    }
+    .gridContainer {
+        overflow-x: hidden;
+        padding-bottom: 50px;
+    }
+    .mainGrid {
+        width: 100%;
+        overflow-y: hidden;
+    }
+</style>
+
+<div class="pull-right">
+    Welcome <b>{{VendorName}}</b>&nbsp;&nbsp;&nbsp;<a href="#/logout">Sign out</a>
+</div>
+<h1 ng-init="pageLoad()">Vendor Portal</h1>
+<hr />
+
+<div ng-show="errorMessage" class="errorMessage" >{{errorMessage}}</div>
+
+<div>
+    <h3>Unacknowledged Purchase Orders</h3>
+    <div id="gridContainerNewPO" class="gridContainer">
+        <div id="searchResultContainerNewPO" class="mainGrid"></div>
+    </div>
+</div>
+
+<div>
+    <h3>Acknowledged / In transit Purchase Orders</h3>
+    <div id="gridContainerAccPO" class="gridContainer">
+        <div id="searchResultContainerAccPO" class="mainGrid"></div>
+    </div>
+</div>

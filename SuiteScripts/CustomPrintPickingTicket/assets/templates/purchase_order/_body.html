@@ -1,0 +1,152 @@
+<div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td style="width:25.9%; height:78px; border-right:2px solid #000; border-bottom:2px solid #000; padding-top: 5px;">
+            <img src="https://system.sandbox.netsuite.com/core/media/media.nl?id=889157&amp;c=3500213&amp;h=8a07f2fa44b1ea0b8b60" width="140" height="34" />
+            <p style="font-size: 8px; line-height: 10px; margin: 15px 0px 0px;">E-mail us at order.accuracy.help@kohls.com<br /> Call us toll-free at 1-866-887-8884</p>
+        </td>
+        <td style="width:34.7%; border-bottom:2px solid #000; text-transform:uppercase; padding:0px 0px 0px 5px; font-size: 13px;">
+            <div style="text-align:center; margin-bottom: 9px;">
+                <barcode codetype="code128" value="[BAR_CODE_ID]" bar-width="0.5" showtext="false"/>
+                <p style="font-size: 8px;align:center;">[BAR_CODE_NUMBER]</p>
+            </div>
+            <table width="100%" border="0" cellpadding="5" cellspacing="0" style="font-size: 8px;">
+                <tr>
+                    <td style="width:30%;">
+                        Recipt ID#:
+                    </td>
+                    <td>[RECEIPT_ID]</td>
+                </tr>
+                <tr>
+                    <td>
+                        Order#:
+                    </td>
+                    <td>[ORDER_NUMBER]</td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <p style="margin:0; border:2px dashed #000; padding: 10px;">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-weight:bold;">
+                <tr>
+                    <td style="width:55px; font-size: 12px; line-height: 13px; text-align: right; padding-top: 5px; height:62px;">Returns ship to:</td>
+                    <td style="width:20px;">&nbsp;</td>
+                    <td style="font-size: 11px; padding-top: 12px;">Kohl's Return Center <br />3350 Salzman Road <br />Middletown, OH 45044-9401</td>
+                </tr>
+                <tr style="font-size: 8px;">
+                    <td style="padding-left: 14px;">ra:</td>
+                    <td>&nbsp;</td>
+                    <td style="padding:2px 0px;">[RA]</td>
+                </tr>
+            </table>
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td style="font-size: 10px; border-right:2px solid #000; height:80px;">
+            <p style="margin:0px; padding-top:2px;"><strong>Ship to:</strong></p>
+            <p style="margin:0px; padding:1px 0px 0px 18px;">[SHIP_TO]</p>
+        </td>
+        <td style="font-size: 10px; border-right:2px solid #000; padding-left: 5px;">
+            <p style="margin:0px; padding-top:2px; padding-left:10px;"><strong>Sold to:</strong></p>
+            <p style="margin:0px; padding:1px 0px 0px 18px;">[BILL_TO]</p>
+        </td>
+        <td>
+            <p style="margin:0px; padding: 2px 0px 0px 14px; line-height: 12px; font-size: 9px;">Thank you for your order! <br />We hope you enjoy your purchase from Kohls.com. <br />Use this form to return your online purchase(s) by mail or at any one of our stores nationwide.</p>
+        </td>
+    </tr>
+</table>
+
+<div style="border:2px solid #000;">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="table01">
+        <tr style="text-transform:uppercase;">
+            <th style="width:9%;">SKU#</th>
+            <th style="width:13%;">UPC#</th>
+            <th style="width:245px;">Description</th>
+            <th style="text-align:center; width:7%;">Qty. Qrd.</th>
+            <th style="text-align:center; width:7%;">Qty. Sent</th>
+            <th >Unit <br />Price</th>
+            <th style="border-left:2px solid #fff; width:7%;">Return Qty.</th>
+            <th style="border-left:2px solid #fff; width:7%;">Return Code</th>
+        </tr>
+
+        [LINE_ITEMS]
+
+        <tr>
+            <td style="height:34px;">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td><p><span style="border-bottom:1px solid #000;">SHIPPING METHOD</span></p><p>[SHIPPING_METHOD]</p></td>
+            <td colspan="3" style="padding-left:23px;"><p>[TRANSACTION_DISCOUNT]</p><p>[T1_DETAILS]</p></td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-left:14px;"><barcode codetype="code128" value="040085010019"/></td>
+            <td style="padding-top: 19px;"><p><span style="border-bottom:1px solid #000;">PAYMENT TYPE</span></p><p>[PAYMENT_TYPE]</p></td>
+            <td colspan="3" style="padding-left: 24px; padding-top: 32px;"><p style="font-size: 6px; line-height: 7px;     width: 132px;">Returns may reduce the value of Kohl's Cash and/or the refund amount. See details printed on Kohl's cash coupon.</p></td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:150px;">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+            <td style="border-left:2px solid #000;">&nbsp;</td>
+        </tr>
+    </table>
+    <p style="text-transform:uppercase; margin:0px 4px 6px; font-size: 8px; width:100%;">Order Date: [ORDER_DATE]</p>
+    <p style="text-transform:uppercase; margin:0; padding:0px 4px 0px; font-size: 8px; border-bottom: 2px solid #000; width:100%;">Note: This is your proof of purchase. Please keep a copy of your records. <span style="float:right; font-size: 7px; width: 67px;">Page 1 of 1</span></p>
+    <p style="margin:0px; padding: 7px 2px 2px; font-size: 9px; width:100%;">As a Kohls.com customer, you have these convenient ways to return or exchange you online purchase(s). Visit ww.kohls.com/returns for more information.</p>
+    <p style="background:#000; color:#fff; margin:0px; padding: 1px 6px; font-size: 9px; width:100%;">return at a store</p>
+    <p style="margin:0px; padding: 0px 3px 5px; font-size: 53%; text-transform:uppercase; width:100%;">bring this packing slip, your credit card, and the item you would like to return to the customer service desk at your nearest kohl's store.   visit our store locator online to find a kohl's near you.</p>
+    <p style="background:#000; color:#fff; margin:0px; padding: 1px 6px; font-size: 9px; width:100%;">return by mail</p>
+    <p style="margin:0px; padding: 2px 4px 5px; font-size: 50%; letter-spacing: 0px; text-transform: uppercase; width:100%;">list the return code and quantity to be returned above.  pack a copy of this packing slip and the merchandise in a box and affix the supplied return   address at the top right.  please send all shipments prepaid.  you will receive a credit for your return on the original credit card and account number</p>
+    <p style="border-top: 2px solid #000; border-bottom: 2px solid #000; margin:0; width:100%;">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-transform:uppercase; font-size:8px;">
+        <tr>
+            <td style="width:18.5%; background:#000; color:#fff; vertical-align:bottom; padding:0px 9px; height: 10px;">Return Codes:</td>
+            <td style="width:19.5%; vertical-align:bottom; padding:0px 23px;">Fit</td>
+            <td style="width:19%; vertical-align:bottom; background:#000; color:#fff; padding:0px 23px;">Quality</td>
+            <td style="width:18.5%; vertical-align:bottom; padding:0px 21px;">Services</td>
+            <td style="background:#000; color:#fff; vertical-align:bottom; padding:0px 24px;">Other</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td style="background:#000; color:#fff; padding:2px 7px;">
+                A = too big <br />B = too Small <br />C = didn't fit properly
+            </td>
+            <td style="padding:2px 7px;">
+                D = scratched/dented <br />E = did not like quality <br />F = defective
+            </td>
+            <td style="background:#000; color:#fff; padding:2px 7px;">
+                G = wrong item/color <br />H = arrived late <br />J = damaged in shipping
+            </td>
+            <td style="padding:2px 7px;">
+                K = did not like/changed mind <br />M = returning gift <br />N = other
+            </td>
+        </tr>
+    </table>
+    </p>
+
+    <p style="padding: 4px 5px; height: 18px; margin: 0px; font-size: 8px; width:100%;">Visit www.kohls.com/ordertracking for detailed information about your order</p>
+    </div>
+
+    <div style="height: 162px">
+    <p>ORDER#</p>
+    <p><barcode codetype="code128" value="[SALES_ORDER_ID]"/></p>
+    <table width="100%" border="1" cellpadding="0" cellspacing="0" class="table02">
+        <tr style="text-transform:uppercase;">
+            <th style="width:20%;">ITEM#</th>
+            <th style="width:50%;">DESCRIPTION</th>
+            <th style="width:20%;">BIN LOC#</th>
+            <th style="width:10%;">QTY</th>
+
+        </tr>
+        [SALES_ORDER_LINE_ITEMS]
+    </table>
+    </div>
+</div>

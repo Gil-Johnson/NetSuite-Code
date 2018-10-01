@@ -1,0 +1,72 @@
+<style>
+    hr {
+        padding-bottom: 30px;
+    }
+    #comments {
+        width: 250px;
+        height: 70px;
+    }
+</style>
+
+<div class="pull-right">
+    Welcome <b>{{VendorName}}</b>&nbsp;&nbsp;&nbsp;<a href="#/logout">Sign out</a>
+</div>
+<h1 ng-init="pageLoad()">Vendor Portal</h1>
+<hr />
+
+<div ng-show="errorMessage" class="errorMessage" >{{errorMessage}}</div>
+
+<form name="request_changes" >
+<div>
+
+    <h3><b><u>{{PoDetailHeading}}</u></b></h3>
+
+    <table style="margin-bottom: 50px" class="header-table">
+        <tr>
+            <td class="col-1"></td><td class="col-2"></td>
+            <td class="col-3"></td>
+            <td class="col-1"></td><td class="col-2"></td>
+        </tr>
+        <tr>
+            <td>Purchase Order #</td><td>{{PurchaseOrderNumber}}</td>
+            <td></td>
+            <td>Ship to Address</td><td class="linebreaks">{{ShipToAddress}}</td>
+        </tr>
+        <tr>
+            <td>Ship Date</td><td><input id="shipDate" name="shipDate" type="text" required ng-model="ShipDate" /><span class="help-block" ng-show="request_changes.shipDate.$error.required && !request_changes.shipDate.$pristine">Ship date is required</span></td>
+            <td></td>
+            <td>Receive By</td><td><input id="receiveByDate" name="receiveByDate" type="text" ng-model="ReceiveBy" ng-change="receiveByChanged()" /></td>
+        </tr>
+        <tr>
+            <td>Vendor</td><td class="linebreaks">{{VendorAddress}}</td>
+            <td></td>
+            <td>Cancel Date</td><td><input id="cancelDate" name="cancelDate" type="text" ng-model="CancelDate" /></td>
+        </tr>
+        <tr>
+            <td>Warehouse</td><td>{{Warehouse}}</td>
+            <td></td>
+            <td>Comments</td><td><textarea id="comments">{{Comments}}</textarea></td>
+        </tr>
+    </table>
+
+
+    <div id="gridContainerItemList" class="gridContainer">
+        <div id="searchResultContainerItemList" class="mainGrid"></div>
+    </div>
+
+    <button class="btn btn-primary" value="SaveChanges" title="Save Changes" ng-click="saveChanges()" ng-disabled="!request_changes.$valid">
+        <span>Save Changes</span>
+    </button>
+    <button class="btn" value="CancelChanges" title="Cancel Changes" ng-click="cancelChanges()">
+        <span>Cancel Changes</span>
+    </button>
+</div>
+</form>
+
+<div id="dialog-confirm-changes" title="Save Changes?">
+    <p>Are you sure you want to save changes? This will overwrite your current changes</p>
+</div>
+
+<div id="dialog-confirm-update-receiveBy" title="Update All Lines?">
+    <p>Changing this field will update all lines on the PO with the new date.  Are you sure you want to update all lines?</p>
+</div>

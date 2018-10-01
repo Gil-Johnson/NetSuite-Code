@@ -1,0 +1,845 @@
+<style data-name="multiselect">
+    .ui-multiselect {
+        padding: 2px 0 2px 4px;
+        text-align: left;
+        font-size: .8em
+    }
+
+    .ui-multiselect span.ui-icon {
+        float: right
+    }
+
+    .ui-multiselect-single .ui-multiselect-checkboxes input {
+        position: absolute !important;
+        top: auto !important;
+        left: -9999px
+    }
+
+    .ui-multiselect-single .ui-multiselect-checkboxes label {
+        padding: 5px !important
+    }
+
+    .ui-multiselect-header {
+        margin-bottom: 3px;
+        font-size: .8em
+    }
+
+    .ui-multiselect-header ul {
+        font-size: .9em
+    }
+
+    .ui-multiselect-header ul li {
+        float: left;
+        padding: 0 10px 0 0
+    }
+
+    .ui-multiselect-header a {
+        text-decoration: none
+    }
+
+    .ui-multiselect-header a:hover {
+        text-decoration: underline
+    }
+
+    .ui-multiselect-header span.ui-icon {
+        float: left
+    }
+
+    .ui-multiselect-header li.ui-multiselect-close {
+        float: right;
+        text-align: right;
+        padding-right: 0
+    }
+
+    .ui-multiselect-menu {
+        display: none;
+        padding: 3px;
+        position: absolute;
+        z-index: 10000;
+        text-align: left
+    }
+
+    .ui-multiselect-checkboxes {
+        position: relative;
+        overflow-y: auto
+    }
+
+    .ui-multiselect-checkboxes label {
+        cursor: default;
+        display: block;
+        border: 1px solid transparent;
+        padding: 3px 1px
+    }
+
+    .ui-multiselect-checkboxes label input {
+        position: relative;
+        top: 1px
+    }
+
+    .ui-multiselect-checkboxes li {
+        clear: both;
+        font-size: .9em;
+        padding-right: 3px
+    }
+
+    .ui-multiselect-checkboxes li.ui-multiselect-optgroup-label {
+        text-align: center;
+        font-weight: 700;
+        border-bottom: 1px solid
+    }
+
+    .ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a {
+        display: block;
+        padding: 3px;
+        margin: 1px 0;
+        text-decoration: none
+    }
+
+    * html .ui-multiselect-checkboxes label {
+        border: none
+    }
+
+    h1, h2, p {
+        margin: 10px 0
+    }
+
+    .hidden {
+        visibility: hidden
+    }
+
+    .message {
+        padding: 10px;
+        margin: 15px 0;
+        display: block;
+        text-align: left
+    }
+
+    .message-title {
+        font-weight: 700;
+        font-size: 1.25em
+    }
+
+    .message-body {
+        margin-top: 4px
+    }
+
+    .error, .notice, .success {
+        padding: .8em;
+        margin-bottom: 1em;
+        border: 2px solid #ddd
+    }
+
+    .error {
+        background: #FBE3E4;
+        color: #8a1f11;
+        border-color: #FBC2C4
+    }
+
+    .notice {
+        background: #FFF6BF;
+        color: #514721;
+        border-color: #FFD324
+    }
+
+    .success {
+        background: #E6EFC2;
+        color: #264409;
+        border-color: #C6D880
+    }
+
+    .error a {
+        color: #8a1f11
+    }
+
+    .notice a {
+        color: #514721
+    }
+
+    .success a {
+        color: #264409
+    }
+
+    #tblFilters td {
+        color: #000;
+        font-size: .9em;
+        padding: 0
+    }
+
+    #tblFilters {
+        margin-bottom: 15px
+    }
+</style>
+
+<style data-name="jTable">
+    .ui-jqgrid-btable {
+        font-size: xx-small;
+    }
+
+    .ui-jqgrid-htable {
+        font-size: xx-small;
+    }
+</style>
+
+<!--jquery.min.css-->
+<link rel="stylesheet" type="text/css"
+      href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css"/>
+
+<!--jquery.min.js-->
+<!-- <script type="text/javascript" src="https://system.sandbox.netsuite.com/core/media/media.nl?id=328991&c=3500213&h=8bd7abff4888dfd538d9&_xt=.js"></script> -->
+<script type="text/javascript"
+        src="https://system.netsuite.com/core/media/media.nl?id=383830&c=3500213&h=a69cd49a9d7a920259be&_xt=.js"></script>
+
+<!--jquery-ui.min.js-->
+<!-- <script type='text/javascript' src='https://system.sandbox.netsuite.com/core/media/media.nl?id=328990&c=3500213&h=5c3b691b787d52bfe84f&_xt=.js'></script> -->
+<script type='text/javascript'
+        src='https://system.netsuite.com/core/media/media.nl?id=383829&c=3500213&h=a4f2efebfe1af0a554dd&_xt=.js'></script>
+
+<!--Multi select DropDown-->
+<script type="text/javascript">
+
+    (function (d) {
+        var k = 0;
+        d.widget("ech.multiselect", {options: {header: !0, height: 175, minWidth: 225, classes: "", checkAllText: "Check all", uncheckAllText: "Uncheck all", noneSelectedText: "Select options", selectedText: "# selected", selectedList: 0, show: null, hide: null, autoOpen: !1, multiple: !0, position: {}}, _create: function () {
+            var a = this.element.hide(), b = this.options;
+            this.speed = d.fx.speeds._default;
+            this._isOpen = !1;
+            a = (this.button = d('<button type="button"><span class="ui-icon ui-icon-triangle-2-n-s"></span></button>')).addClass("ui-multiselect ui-widget ui-state-default ui-corner-all").addClass(b.classes).attr({title: a.attr("title"), "aria-haspopup": !0, tabIndex: a.attr("tabIndex")}).insertAfter(a);
+            (this.buttonlabel = d("<span />")).html(b.noneSelectedText).appendTo(a);
+            var a = (this.menu = d("<div />")).addClass("ui-multiselect-menu ui-widget ui-widget-content ui-corner-all").addClass(b.classes).appendTo(document.body), c = (this.header = d("<div />")).addClass("ui-widget-header ui-corner-all ui-multiselect-header ui-helper-clearfix").appendTo(a);
+            (this.headerLinkContainer = d("<ul />")).addClass("ui-helper-reset").html(function () {
+                return!0 === b.header ? '<li><a class="ui-multiselect-all" href="#"><span class="ui-icon ui-icon-check"></span><span>' + b.checkAllText + '</span></a></li><li><a class="ui-multiselect-none" href="#"><span class="ui-icon ui-icon-closethick"></span><span>' + b.uncheckAllText + "</span></a></li>" : "string" === typeof b.header ? "<li>" + b.header + "</li>" : ""
+            }).append('<li class="ui-multiselect-close"><a href="#" class="ui-multiselect-close"><span class="ui-icon ui-icon-circle-close"></span></a></li>').appendTo(c);
+            (this.checkboxContainer = d("<ul />")).addClass("ui-multiselect-checkboxes ui-helper-reset").appendTo(a);
+            this._bindEvents();
+            this.refresh(!0);
+            b.multiple || a.addClass("ui-multiselect-single")
+        }, _init: function () {
+            !1 === this.options.header && this.header.hide();
+            this.options.multiple || this.headerLinkContainer.find(".ui-multiselect-all, .ui-multiselect-none").hide();
+            this.options.autoOpen && this.open();
+            this.element.is(":disabled") && this.disable()
+        }, refresh: function (a) {
+            var b = this.element, c = this.options, f = this.menu, h = this.checkboxContainer, g = [], e = "", i = b.attr("id") || k++;
+            b.find("option").each(function (b) {
+                d(this);
+                var a = this.parentNode, f = this.innerHTML, h = this.title, k = this.value, b = "ui-multiselect-" + (this.id || i + "-option-" + b), l = this.disabled, n = this.selected, m = ["ui-corner-all"], o = (l ? "ui-multiselect-disabled " : " ") + this.className, j;
+                "OPTGROUP" === a.tagName && (j = a.getAttribute("label"), -1 === d.inArray(j, g) && (e += '<li class="ui-multiselect-optgroup-label ' + a.className + '"><a href="#">' + j + "</a></li>", g.push(j)));
+                l && m.push("ui-state-disabled");
+                n && !c.multiple && m.push("ui-state-active");
+                e += '<li class="' + o + '">';
+                e += '<label for="' + b + '" title="' + h + '" class="' + m.join(" ") + '">';
+                e += '<input id="' + b + '" name="multiselect_' + i + '" type="' + (c.multiple ? "checkbox" : "radio") + '" value="' + k + '" title="' + f + '"';
+                n && (e += ' checked="checked"', e += ' aria-selected="true"');
+                l && (e += ' disabled="disabled"', e += ' aria-disabled="true"');
+                e += " /><span>" + f + "</span></label></li>"
+            });
+            h.html(e);
+            this.labels = f.find("label");
+            this.inputs = this.labels.children("input");
+            this._setButtonWidth();
+            this._setMenuWidth();
+            this.button[0].defaultValue = this.update();
+            a || this._trigger("refresh")
+        }, update: function () {
+            var a = this.options, b = this.inputs, c = b.filter(":checked"), f = c.length, a = 0 === f ? a.noneSelectedText : d.isFunction(a.selectedText) ? a.selectedText.call(this, f, b.length, c.get()) : /\d/.test(a.selectedList) && 0 < a.selectedList && f <= a.selectedList ? c.map(function () {
+                return d(this).next().html()
+            }).get().join(", ") : a.selectedText.replace("#", f).replace("#", b.length);
+            this.buttonlabel.html(a);
+            return a
+        }, _bindEvents: function () {
+            function a() {
+                b[b._isOpen ? "close" : "open"]();
+                return!1
+            }
+
+            var b = this, c = this.button;
+            c.find("span").bind("click.multiselect", a);
+            c.bind({click: a, keypress: function (a) {
+                switch (a.which) {
+                    case 27:
+                    case 38:
+                    case 37:
+                        b.close();
+                        break;
+                    case 39:
+                    case 40:
+                        b.open()
+                }
+            }, mouseenter: function () {
+                c.hasClass("ui-state-disabled") || d(this).addClass("ui-state-hover")
+            }, mouseleave: function () {
+                d(this).removeClass("ui-state-hover")
+            }, focus: function () {
+                c.hasClass("ui-state-disabled") || d(this).addClass("ui-state-focus")
+            }, blur: function () {
+                d(this).removeClass("ui-state-focus")
+            }});
+            this.header.delegate("a", "click.multiselect", function (a) {
+                if (d(this).hasClass("ui-multiselect-close"))b.close(); else b[d(this).hasClass("ui-multiselect-all") ? "checkAll" : "uncheckAll"]();
+                a.preventDefault()
+            });
+            this.menu.delegate("li.ui-multiselect-optgroup-label a", "click.multiselect", function (a) {
+                a.preventDefault();
+                var c = d(this), g = c.parent().nextUntil("li.ui-multiselect-optgroup-label").find("input:visible:not(:disabled)"), e = g.get(), c = c.parent().text();
+                !1 !== b._trigger("beforeoptgrouptoggle", a, {inputs: e, label: c}) && (b._toggleChecked(g.filter(":checked").length !== g.length, g), b._trigger("optgrouptoggle", a, {inputs: e, label: c, checked: e[0].checked}))
+            }).delegate("label", "mouseenter.multiselect", function () {
+                d(this).hasClass("ui-state-disabled") || (b.labels.removeClass("ui-state-hover"), d(this).addClass("ui-state-hover").find("input").focus())
+            }).delegate("label", "keydown.multiselect", function (a) {
+                a.preventDefault();
+                switch (a.which) {
+                    case 9:
+                    case 27:
+                        b.close();
+                        break;
+                    case 38:
+                    case 40:
+                    case 37:
+                    case 39:
+                        b._traverse(a.which, this);
+                        break;
+                    case 13:
+                        d(this).find("input")[0].click()
+                }
+            }).delegate('input[type="checkbox"], input[type="radio"]', "click.multiselect", function (a) {
+                var c = d(this), g = this.value, e = this.checked, i = b.element.find("option");
+                this.disabled || !1 === b._trigger("click", a, {value: g, text: this.title, checked: e}) ? a.preventDefault() : (c.focus(), c.attr("aria-selected", e), i.each(function () {
+                    this.value === g ? this.selected = e : b.options.multiple || (this.selected = !1)
+                }), b.options.multiple || (b.labels.removeClass("ui-state-active"), c.closest("label").toggleClass("ui-state-active", e), b.close()), b.element.trigger("change"), setTimeout(d.proxy(b.update, b), 10))
+            });
+            d(document).bind("mousedown.multiselect", function (a) {
+                b._isOpen && (!d.contains(b.menu[0], a.target) && !d.contains(b.button[0], a.target) && a.target !== b.button[0]) && b.close()
+            });
+            d(this.element[0].form).bind("reset.multiselect", function () {
+                setTimeout(d.proxy(b.refresh, b), 10)
+            })
+        }, _setButtonWidth: function () {
+            var a = this.element.outerWidth(), b = this.options;
+            /\d/.test(b.minWidth) && a < b.minWidth && (a = b.minWidth);
+            this.button.width(a)
+        }, _setMenuWidth: function () {
+            var a = this.menu, b = this.button.outerWidth() - parseInt(a.css("padding-left"), 10) - parseInt(a.css("padding-right"), 10) - parseInt(a.css("border-right-width"), 10) - parseInt(a.css("border-left-width"), 10);
+            a.width(b || this.button.outerWidth())
+        }, _traverse: function (a, b) {
+            var c = d(b), f = 38 === a || 37 === a, c = c.parent()[f ? "prevAll" : "nextAll"]("li:not(.ui-multiselect-disabled, .ui-multiselect-optgroup-label)")[f ? "last" : "first"]();
+            c.length ? c.find("label").trigger("mouseover") : (c = this.menu.find("ul").last(), this.menu.find("label")[f ? "last" : "first"]().trigger("mouseover"), c.scrollTop(f ? c.height() : 0))
+        }, _toggleState: function (a, b) {
+            return function () {
+                this.disabled || (this[a] = b);
+                b ? this.setAttribute("aria-selected", !0) : this.removeAttribute("aria-selected")
+            }
+        }, _toggleChecked: function (a, b) {
+            var c = b && b.length ? b : this.inputs, f = this;
+            c.each(this._toggleState("checked", a));
+            c.eq(0).focus();
+            this.update();
+            var h = c.map(function () {
+                return this.value
+            }).get();
+            this.element.find("option").each(function () {
+                !this.disabled && -1 < d.inArray(this.value, h) && f._toggleState("selected", a).call(this)
+            });
+            c.length && this.element.trigger("change")
+        }, _toggleDisabled: function (a) {
+            this.button.attr({disabled: a, "aria-disabled": a})[a ? "addClass" : "removeClass"]("ui-state-disabled");
+            var b = this.menu.find("input"), b = a ? b.filter(":enabled").data("ech-multiselect-disabled", !0) : b.filter(function () {
+                return!0 === d.data(this, "ech-multiselect-disabled")
+            }).removeData("ech-multiselect-disabled");
+            b.attr({disabled: a, "arial-disabled": a}).parent()[a ? "addClass" : "removeClass"]("ui-state-disabled");
+            this.element.attr({disabled: a, "aria-disabled": a})
+        }, open: function () {
+            var a = this.button, b = this.menu, c = this.speed, f = this.options, h = [];
+            if (!(!1 === this._trigger("beforeopen") || a.hasClass("ui-state-disabled") || this._isOpen)) {
+                var g = b.find("ul").last(), e = f.show, i = a.offset();
+                d.isArray(f.show) && (e = f.show[0], c = f.show[1] || this.speed);
+                e && (h = [e, c]);
+                g.scrollTop(0).height(f.height);
+                d.ui.position && !d.isEmptyObject(f.position) ? (f.position.of = f.position.of || a, b.show().position(f.position).hide()) : b.css({top: i.top + a.outerHeight(), left: i.left});
+                d.fn.show.apply(b, h);
+                this.labels.eq(0).trigger("mouseover").trigger("mouseenter").find("input").trigger("focus");
+                a.addClass("ui-state-active");
+                this._isOpen = !0;
+                this._trigger("open")
+            }
+        }, close: function () {
+            if (!1 !== this._trigger("beforeclose")) {
+                var a = this.options, b = a.hide, c = this.speed, f = [];
+                d.isArray(a.hide) && (b = a.hide[0], c = a.hide[1] || this.speed);
+                b && (f = [b, c]);
+                d.fn.hide.apply(this.menu, f);
+                this.button.removeClass("ui-state-active").trigger("blur").trigger("mouseleave");
+                this._isOpen = !1;
+                this._trigger("close")
+            }
+        }, enable: function () {
+            this._toggleDisabled(!1)
+        }, disable: function () {
+            this._toggleDisabled(!0)
+        }, checkAll: function () {
+            this._toggleChecked(!0);
+            this._trigger("checkAll")
+        }, uncheckAll: function () {
+            this._toggleChecked(!1);
+            this._trigger("uncheckAll")
+        }, getChecked: function () {
+            return this.menu.find("input").filter(":checked")
+        }, destroy: function () {
+            d.Widget.prototype.destroy.call(this);
+            this.button.remove();
+            this.menu.remove();
+            this.element.show();
+            return this
+        }, isOpen: function () {
+            return this._isOpen
+        }, widget: function () {
+            return this.menu
+        }, getButton: function () {
+            return this.button
+        }, _setOption: function (a, b) {
+            var c = this.menu;
+            switch (a) {
+                case "header":
+                    c.find("div.ui-multiselect-header")[b ? "show" : "hide"]();
+                    break;
+                case "checkAllText":
+                    c.find("a.ui-multiselect-all span").eq(-1).text(b);
+                    break;
+                case "uncheckAllText":
+                    c.find("a.ui-multiselect-none span").eq(-1).text(b);
+                    break;
+                case "height":
+                    c.find("ul").last().height(parseInt(b, 10));
+                    break;
+                case "minWidth":
+                    this.options[a] = parseInt(b, 10);
+                    this._setButtonWidth();
+                    this._setMenuWidth();
+                    break;
+                case "selectedText":
+                case "selectedList":
+                case "noneSelectedText":
+                    this.options[a] = b;
+                    this.update();
+                    break;
+                case "classes":
+                    c.add(this.button).removeClass(this.options.classes).addClass(b);
+                    break;
+                case "multiple":
+                    c.toggleClass("ui-multiselect-single", !b), this.options.multiple = b, this.element[0].multiple = b, this.refresh()
+            }
+            d.Widget.prototype._setOption.apply(this, arguments)
+        }})
+    })(jQuery);
+
+</script>
+
+<!--Underscore JS file-->
+<!-- <script type='text/javascript' src='https://system.sandbox.netsuite.com/core/media/media.nl?id=328992&c=3500213&h=bd430ca937037d5c6fed&_xt=.js'></script> -->
+<script type='text/javascript'
+        src='https://system.netsuite.com/core/media/media.nl?id=383831&c=3500213&h=50b4dc6238c6c01edc5f&_xt=.js'></script>
+
+<!--xdr-->
+<!-- <script type="text/javascript" src="https://system.sandbox.netsuite.com/core/media/media.nl?id=328989&c=3500213&h=e8da5e5af5c45df7f6d5&_xt=.js"></script> -->
+<script type="text/javascript"
+        src="https://system.netsuite.com/core/media/media.nl?id=328990&c=3500213&h=5c3b691b787d52bfe84f&_xt=.js"></script>
+
+<!-- ui.jqgrid.css -->
+<!-- <link rel="stylesheet" type="text/css" media="screen" href="https://system.sandbox.netsuite.com/core/media/media.nl?id=330216&c=3500213&h=4fd266a599c29ea71db9&_xt=.css" /> -->
+<link rel="stylesheet" type="text/css" media="screen"
+      href="https://system.netsuite.com/core/media/media.nl?id=384030&c=3500213&h=749168dac3b0c4a6bd32&_xt=.css"/>
+
+<!-- ui.multiselect.css -->
+<!-- <link rel="stylesheet" type="text/css" media="screen" href="https://system.sandbox.netsuite.com/core/media/media.nl?id=330217&c=3500213&h=ec125093288b9668b266&_xt=.css" /> -->
+<link rel="stylesheet" type="text/css" media="screen"
+      href="https://system.netsuite.com/core/media/media.nl?id=384031&c=3500213&h=f71eb52c860c43feb78f&_xt=.css"/>
+
+<!-- grid.locale-en.js -->
+<!-- <script type="text/javascript" src="https://system.sandbox.netsuite.com/core/media/media.nl?id=330218&c=3500213&h=b286137dd5afdd573ad1&_xt=.js"></script> -->
+<script type="text/javascript"
+        src="https://system.netsuite.com/core/media/media.nl?id=384229&c=3500213&h=abc44452376384bc435a&_xt=.js"></script>
+
+<script type="text/javascript">
+    $.jgrid.no_legacy_api = true;
+    $.jgrid.useJSON = true;
+</script>
+
+<!-- ui.multiselect.js -->
+<!-- <script type="text/javascript" src="https://system.sandbox.netsuite.com/core/media/media.nl?id=330221&c=3500213&h=af9b703bfe5ae86af217&_xt=.js"></script> -->
+<script type="text/javascript"
+        src="https://system.netsuite.com/core/media/media.nl?id=384129&c=3500213&h=60af8266662494b82b5d&_xt=.js"></script>
+
+<!-- jquery.jqGrid.js -->
+<!-- <script type="text/javascript" src="https://system.sandbox.netsuite.com/core/media/media.nl?id=330219&c=3500213&h=6c99f7753ca590466873&_xt=.js"></script> -->
+<script type="text/javascript"
+        src="https://system.netsuite.com/core/media/media.nl?id=384029&c=3500213&h=1708edc89728c90a2da7&_xt=.js"></script>
+
+<style>
+
+    /*Splitter style */
+    #LeftPane {
+        /* optional, initial splitbar position */
+        overflow: auto;
+    }
+
+    #RightPane {
+        padding: 2px;
+        overflow: auto;
+    }
+
+    .ui-tabs-nav li {
+        position: relative;
+    }
+
+    .ui-tabs-selected a span {
+        padding-right: 10px;
+    }
+
+    .ui-tabs-close {
+        display: none;
+        position: absolute;
+        top: 3px;
+        right: 0px;
+        z-index: 800;
+        width: 16px;
+        height: 14px;
+        font-size: 10px;
+        font-style: normal;
+        cursor: pointer;
+    }
+
+    .ui-tabs-selected .ui-tabs-close {
+        display: block;
+    }
+
+    .ui-layout-west .ui-jqgrid tr.jqgrow td {
+        border-bottom: 0px none;
+    }
+
+    .ui-datepicker {
+        z-index: 1200;
+    }
+
+    .rotate {
+        /* for Safari */
+        -webkit-transform: rotate(-90deg);
+
+        /* for Firefox */
+        -moz-transform: rotate(-90deg);
+
+        /* for Internet Explorer */
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    }
+
+    .ui-dialog table {
+        border-collapse: collapse;
+    }
+
+    #yearly-detail .month-row td {
+        font-weight: bold;
+    }
+
+    .ui-dialog-close-icon-fixed {
+        margin: -8px !important;
+    }
+
+    .bom-comp-head-font {
+        font-size: 11px;
+    }
+    .bom-comp-head-font-bold {
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .substitute-item-main {
+
+    }
+    .substitute-item-sub {
+        font-weight: bold;
+        color: red !important;
+    }
+    .item-end-date-error-style {
+        font-size: 10px;
+        color: red;
+        font-weight: bold;
+    }
+    .blink-text {
+        -moz-animation-duration: 700ms;
+        -moz-animation-name: blink;
+        -moz-animation-iteration-count: infinite;
+        -moz-animation-direction: alternate;
+
+        -webkit-animation-duration: 700ms;
+        -webkit-animation-name: blink;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-direction: alternate;
+
+        animation-duration: 700ms;
+        animation-name: blink;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+    }
+    @-moz-keyframes blink {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
+    @-webkit-keyframes blink {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
+    @keyframes blink {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
+</style>
+
+<div>
+    <div id="divMessage" class="ui-corner-all" style="display: none; padding: 0 .7em;">
+        <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+            <span id="lbl_message"></span></p>
+    </div>
+    <br>
+
+    <div>
+        <button onclick="loadData()" id="btnSearch">Search</button>
+    </div>
+
+    <div style="width: 100%;">
+        <table id="scrolling"></table>
+        <div id="pscrolling"></div>
+    </div>
+
+    <div id="dialog-item-detail" style="display: none;" title="Item Detail">
+        <table width="100%" border="1">
+
+            <tbody>
+            <tr>
+                <td width="40%" style="vertical-align: top;">
+                    <table id="basic-detail" width="100%" border="1">
+
+                        <tbody>
+                        <tr>
+                            <td width="50%"><b>On Hand</b></td>
+                            <td id="td-on-hand" width="50%" style="text-align: center;"></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>Committed</b></td>
+                            <td id="td-committed" width="50%" style="text-align: center;"></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>Back Ordered</b></td>
+                            <td id="td-back-ordered" width="50%" style="text-align: center;"></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>Available</b></td>
+                            <td id="td-available" width="50%" style="text-align: center;"></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>On Order</b></td>
+                            <td id="td-on-order" width="50%" style="text-align: center;"></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>Balance</b></td>
+                            <td id="td-current-need" width="50%" style="text-align: center;"></td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                    <table width="100%" border="1" id="pre-next-btn">
+                        <tbody>
+                        <tr>
+                            <td width="50%"><b>Quantity</b></td>
+                            <td width="50%"><input id="item-qty" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td width="50%"><b>End Date</b></td>
+                            <td width="50%">
+                                <input id="item-end-date" type="text" />
+                                <label id="item-end-date-error"></label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center" width="50%">
+
+                                <img id="prev-item-btn" style="cursor: pointer" onclick="showPrevNextItem(this)"
+                                     src="https://system.netsuite.com/core/media/media.nl?id=391325&c=3500213&h=502168284567f8de8b87" /></td>
+                            <td style="text-align: center"  width="50%">
+
+                                <img id="next-item-btn"  style="cursor: pointer" onclick="showPrevNextItem(this)"
+                                     src="https://system.netsuite.com/core/media/media.nl?id=391326&c=3500213&h=b2dceae51bcce91371e3" /></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table id="bom-components" width="350px" border="1" style="display: none;">
+                        <tr>
+                            <td colspan="5"><b>BOM Components</b></td>
+                        </tr>
+                        <tr>
+                            <td width="40%" class="bom-comp-head-font-bold">Item</td>
+                            <td width="12%" class="bom-comp-head-font-bold">Available</td>
+                            <td width="14%" class="bom-comp-head-font-bold">On Hand</td>
+                            <td width="12%" class="bom-comp-head-font-bold">Back Ordered</td>
+                            <td width="14%" class="bom-comp-head-font-bold">On Order</td>
+                        </tr>
+                        <tr class="bom-comp-row-sample" style="display: none;">
+                            <td class="bom-comp-head-font"></td>
+                            <td class="bom-comp-head-font"></td>
+                            <td class="bom-comp-head-font"></td>
+                            <td class="bom-comp-head-font"></td>
+                            <td class="bom-comp-head-font"></td>
+                        </tr>
+                    </table>
+
+                    <table id="substitute-item-detail" width="100%" border="1" style="display: none;">
+                        <tbody>
+                            <tr>
+                                <td width="50%"><b>Substitute for:</b></td>
+                                <td width="50%" style="text-align: center;">
+                                    <table id="substitute-items" width="100%" border="1">
+                                        <tr class="substitute-item-row-sample" style="display: none;">
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table width="100%" border="1">
+                        <tbody>
+                        <tr>
+                            <td width="50%"><b>Status:</b></td>
+                            <td width="50%" style="text-align: center;">
+                                <table width="100%" border="1">
+                                    <tr>
+                                        <td id="td-item-status" width="50%" style="text-align: center;"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr id="tr-buildable-qty-details">
+                            <td width="50%"><b>Buildable:</b></td>
+                            <td width="50%" style="text-align: center;">
+                                <table width="100%" border="1">
+                                    <tr>
+                                        <td id="td-buildable-qty" width="50%" style="text-align: center;"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+                <td width="60%" style="text-align: center; vertical-align: middle;">
+                    <img src="" id="large_image" alt="Large Image" style="width: 100%; height: 300px;"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+
+                    <!--<table id="bom-components2" width="100%" border="1" style="display: none;">-->
+						<!--<tr>-->
+                            <!--<td colspan="5"><b>BOM Components</b></td>-->
+                        <!--</tr>-->
+                        <!--<tr>-->
+                            <!--<td width="40%">Item</td>-->
+                            <!--<td width="15%">Available</td>-->
+                            <!--<td width="15%">On Hand</td>-->
+                            <!--<td width="15%">Back Ordered</td>-->
+                            <!--<td width="15%">On Order</td>-->
+                        <!--</tr>-->
+                        <!--<tr>-->
+                            <!--<td>lalal80</td>-->
+                            <!--<td>2133</td>-->
+                            <!--<td>323</td>-->
+                            <!--<td>0</td>-->
+                            <!--<td>23</td>-->
+                        <!--</tr>-->
+                    <!--</table>-->
+
+                    <table id="yearly-detail" width="100%" border="1">
+
+                        <tbody>
+                        <tr style="text-align: center;" class="month-row">
+                            <td></td>
+                            <td>Jan</td>
+                            <td>Feb</td>
+                            <td>Mar</td>
+                            <td>Apr</td>
+                            <td>May</td>
+                            <td>Jun</td>
+                            <td>Jul</td>
+                            <td>Aug</td>
+                            <td>Sep</td>
+                            <td>Oct</td>
+                            <td>Nov</td>
+                            <td>Dec</td>
+                            <td>Total</td>
+                        </tr>
+                        <tr class="detail-row-sample" style="display: none;">
+                            <td></td>
+                            <td data-month="" style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                            <td style="text-align: center;"></td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+    <div id="dialog-item-hover" style="display: none;" title="Transaction Detail">
+        <img id='imgLoadingTeams' style='display:none;'
+             src='https://system.netsuite.com/core/media/media.nl?id=328980&c=3500213&h=32302175e46c0a2e4c3f'
+             height='26' width='26'/>
+
+        <table width="100%" border="1">
+
+            <tbody>
+            <tr>
+                <td width="40%" style="vertical-align: top;">
+                    <div id="output">
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="dialog-transaction-success" style="display: none;" title="Newly Created Orders">
+        <div id="success-output">
+
+        </div>
+    </div>
+</div>

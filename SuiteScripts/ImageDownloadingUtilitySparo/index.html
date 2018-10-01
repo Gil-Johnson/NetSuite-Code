@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  	<meta charset="utf-8">
+  	<title>Rico Configurable Image download</title>
+	<style data-name="multiselect">
+		.ui-multiselect { padding:2px 0 2px 4px; text-align:left }
+		.ui-multiselect span.ui-icon { float:right }
+		.ui-multiselect-single .ui-multiselect-checkboxes input { position:absolute !important; top: auto !important; left:-9999px; }
+		.ui-multiselect-single .ui-multiselect-checkboxes label { padding:5px !important }
+		
+		.ui-multiselect-header { margin-bottom:3px; padding:3px 0 3px 4px }
+		.ui-multiselect-header ul { font-size:0.9em }
+		.ui-multiselect-header ul li { float:left; padding:0 10px 0 0 }
+		.ui-multiselect-header a { text-decoration:none }
+		.ui-multiselect-header a:hover { text-decoration:underline }
+		.ui-multiselect-header span.ui-icon { float:left }
+		.ui-multiselect-header li.ui-multiselect-close { float:right; text-align:right; padding-right:0 }
+		
+		.ui-multiselect-menu { display:none; padding:3px; position:absolute; z-index:10000; text-align: left }
+		.ui-multiselect-checkboxes { position:relative /* fixes bug in IE6/7 */; overflow-y:auto }
+		.ui-multiselect-checkboxes label { cursor:default; display:block; border:1px solid transparent; padding:3px 1px }
+		.ui-multiselect-checkboxes label input { position:relative; top:1px }
+		.ui-multiselect-checkboxes li { clear:both; font-size:0.9em; padding-right:3px }
+		.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { text-align:center; font-weight:bold; border-bottom:1px solid }
+		.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a { display:block; padding:3px; margin:1px 0; text-decoration:none }
+		
+		/* remove label borders in IE6 because IE6 does not support transparency */
+		* html .ui-multiselect-checkboxes label { border:none }
+		
+		
+		body { font:12px Helvetica, arial, sans-serif }
+		h1, h2, p { margin:10px 0 }
+		.hidden { visibility:hidden }
+		
+		
+		.message { padding:10px; margin:15px 0; display:block; text-align:left }
+		.message-title { font-weight:bold; font-size:1.25em }
+		.message-body { margin-top:4px }
+		.error, .notice, .success { padding:.8em; margin-bottom:1em; border:2px solid #ddd }
+		.error { background:#FBE3E4; color:#8a1f11; border-color:#FBC2C4 }
+		.notice { background:#FFF6BF; color:#514721; border-color:#FFD324 }
+		.success { background:#E6EFC2; color:#264409; border-color:#C6D880 }
+		.error a { color:#8a1f11 }
+		.notice a { color:#514721 }
+		.success a { color:#264409 }
+	
+	
+		body {
+			background-color: black;
+			 padding:20px;
+		}
+		#tblFilters td {
+			color: white;
+			font-size: 0.9em;
+			padding:10px;
+		}
+	</style>
+	
+	<style data-name="jTable">
+		div.jtable-main-container {
+		  position: relative;
+		}
+		div.jtable-main-container div.jtable-title {
+		  position: relative;
+		  text-align: left;
+		}
+		div.jtable-main-container div.jtable-title .jtable-close-button {
+		  right: 0px;
+		  top: 0px;
+		  bottom: 0px;
+		  position: absolute;
+		}
+		div.jtable-main-container table.jtable {
+		  width: 100%;
+		}
+		div.jtable-main-container table.jtable thead th {
+		  vertical-align: middle;
+		  text-align: left;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container {
+		  position: relative;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container span.jtable-column-header-text {
+		  display: inline-block;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container div.jtable-column-resize-handler {
+		  position: absolute;
+		  height: 24px;
+		  width: 8px;
+		  right: -8px;
+		  top: -2px;
+		  z-index: 2;
+		  cursor: col-resize;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-command-column-header {
+		  text-align: center;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-selecting {
+		  text-align: center;
+		  width: 1%;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-selecting input {
+		  cursor: pointer;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-sortable {
+		  cursor: pointer;
+		}
+		div.jtable-main-container table.jtable tbody tr > td .jtable-command-button {
+		  margin: 0px;
+		  padding: 0px;
+		  cursor: pointer;
+		  border: none;
+		  display: inline;
+		}
+		div.jtable-main-container table.jtable tbody tr > td .jtable-command-button span {
+		  display: none;
+		}
+		div.jtable-main-container table.jtable tbody tr > td.jtable-command-column {
+		  text-align: center;
+		  vertical-align: middle;
+		}
+		div.jtable-main-container table.jtable tbody tr > td.jtable-selecting-column {
+		  text-align: center;
+		  vertical-align: middle;
+		}
+		div.jtable-main-container table.jtable tbody tr > td.jtable-selecting-column input {
+		  cursor: pointer;
+		}
+		div.jtable-main-container table.jtable tbody tr.jtable-no-data-row {
+		  text-align: center;
+		}
+		div.jtable-main-container div.jtable-bottom-panel {
+		  position: relative;
+		  min-height: 24px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel div.jtable-left-area {
+		  left: 0px;
+		  top: 0px;
+		  bottom: 0px;
+		  position: absolute;
+		}
+		div.jtable-main-container div.jtable-bottom-panel div.jtable-right-area {
+		  right: 0px;
+		  top: 0px;
+		  bottom: 0px;
+		  position: absolute;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list {
+		  display: inline-block;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-space,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-first,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-last,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-previous,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-next,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-active {
+		  padding: 2px 5px;
+		  display: inline-block;
+		  cursor: pointer;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-space,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-active {
+		  cursor: default;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-info {
+		  display: inline-block;
+		  margin-left: 5px;
+		  padding: 2px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record {
+		  display: inline-block;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record a {
+		  text-decoration: none;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record a:hover {
+		  text-decoration: underline;
+		}
+		div.jtable-main-container div.jtable-column-resize-bar {
+		  opacity: 0.5;
+		  filter: alpha(opacity=50);
+		  position: absolute;
+		  display: none;
+		  width: 1px;
+		  background-color: #000;
+		}
+		div.jtable-main-container div.jtable-column-selection-container {
+		  position: absolute;
+		  display: none;
+		  border: 1px solid #C8C8C8;
+		  background: #fff;
+		  color: #000;
+		  z-index: 101;
+		  padding: 5px;
+		}
+		div.jtable-main-container div.jtable-column-selection-container ul.jtable-column-select-list {
+		  margin: 0px;
+		  padding: 0px;
+		  list-style: none;
+		}
+		div.jtable-main-container div.jtable-column-selection-container ul.jtable-column-select-list li {
+		  margin: 0px;
+		  padding: 2px 0px;
+		}
+		div.jtable-main-container div.jtable-column-selection-container ul.jtable-column-select-list li label span {
+		  position: relative;
+		  top: -1px;
+		  margin-left: 4px;
+		}
+		div.jtable-main-container div.jtable-column-selection-container ul.jtable-column-select-list li input[type="checkbox"] {
+		  cursor: pointer;
+		}
+		form.jtable-dialog-form div.jtable-input-field-container {
+		  padding: 2px 0px 3px 0px;
+		  border-bottom: 1px solid #ddd;
+		}
+		form.jtable-dialog-form div.jtable-input-field-container:last-child {
+		  border: none;
+		}
+		form.jtable-dialog-form div.jtable-input-label {
+		  padding: 2px 3px;
+		  font-size: 1.1em;
+		  color: #666;
+		}
+		form.jtable-dialog-form div.jtable-input {
+		  padding: 2px;
+		}
+		form.jtable-dialog-form div.jtable-date-input {
+		  /* No additional style */
+		
+		}
+		form.jtable-dialog-form div.jtable-text-input {
+		  /* No additional style */
+		
+		}
+		form.jtable-dialog-form span.jtable-option-text-clickable {
+		  position: relative;
+		  top: -2px;
+		}
+		form.jtable-dialog-form div.jtable-textarea-input textarea {
+		  width: 300px;
+		  min-height: 60px;
+		}
+		form.jtable-dialog-form div.jtable-checkbox-input span,
+		form.jtable-dialog-form div.jtable-radio-input span {
+		  padding-left: 4px;
+		}
+		form.jtable-dialog-form div.jtable-radio-input input,
+		form.jtable-dialog-form div.jtable-checkbox-input input,
+		form.jtable-dialog-form span.jtable-option-text-clickable {
+		  cursor: pointer;
+		}
+		div.jtable-busy-panel-background {
+		  opacity: 0.1;
+		  filter: alpha(opacity=50);
+		  z-index: 998;
+		  position: absolute;
+		  background-color: #000;
+		}
+		div.jtable-busy-message {
+		  cursor: wait;
+		  z-index: 999;
+		  position: absolute;
+		  margin: 5px;
+		  font-size: 1.25em;
+		  color: #000;
+		  background-color: #ddd;
+		}
+		div.jtable-contextmenu-overlay {
+		  position: fixed;
+		  left: 0px;
+		  top: 0px;
+		  width: 100%;
+		  height: 100%;
+		  z-index: 100;
+		}
+		div.jtable-main-container {
+		  font-family: Verdana, Arial, Helvetica, sans-serif;
+		  font-size: 11px;
+		  font-weight: 400;
+		  color: #222;
+		}
+		div.jtable-main-container div.jtable-title {
+		  -webkit-border-radius: 3px 3px 0 0;
+		  -moz-border-radius: 3px 3px 0 0;
+		  border-radius: 3px 3px 0 0;
+		  line-height: 34px;
+		  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+		  padding-left: 10px;
+		  border: 1px solid;
+		}
+		div.jtable-main-container div.jtable-title div.jtable-title-text {
+		  font-weight: bold;
+		}
+		div.jtable-main-container div.jtable-title .jtable-close-button {
+		  right: 6px;
+		  top: 6px;
+		  bottom: 6px;
+		  position: absolute;
+		  opacity: 0.8;
+		  filter: alpha(opacity=50);
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269382&c=3500213&h=e5e2acbde41bc72014b2') no-repeat;
+		  width: 22px;
+		  height: 22px;
+		}
+		div.jtable-main-container div.jtable-title .jtable-close-button:hover {
+		  opacity: 1;
+		  filter: alpha(opacity=50);
+		}
+		div.jtable-main-container table.jtable {
+		  border-collapse: collapse;
+		  border-spacing: 0;
+		  border: 1px solid #C8C8C8;
+		}
+		div.jtable-main-container table.jtable thead {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269289&c=3500213&h=ed4931189af354e2c958') repeat-x scroll top left #dddddd;
+		  border-top: 1px solid #fff;
+		  border-bottom: 1px solid #C8C8C8;
+		}
+		div.jtable-main-container table.jtable thead th {
+		  padding: 4px 3px 4px 6px;
+		  border-left: 1px solid #fff;
+		  border-right: 1px solid #C8C8C8;
+		}
+		div.jtable-main-container table.jtable thead th:first-child {
+		  border-left: none;
+		}
+		div.jtable-main-container table.jtable thead thth:last-child {
+		  border-right: none;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container {
+		  height: 20px;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header span.jtable-column-header-text {
+		  margin-top: 3px;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-selecting {
+		  padding: 5px;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-sortable div.jtable-column-header-container {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269387&c=3500213&h=32b4b607adcfccd4fb34') no-repeat right;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-sorted-asc div.jtable-column-header-container {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269385&c=3500213&h=7d06ba7e39d254329715') no-repeat right;
+		}
+		div.jtable-main-container table.jtable thead th.jtable-column-header-sorted-desc div.jtable-column-header-container {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269386&c=3500213&h=b598520ac98a5a186c8f') no-repeat right;
+		}
+		div.jtable-main-container table.jtable tbody > tr {
+		  padding: 2px;
+		  background: #f8f8f8;
+		  height: 30px;
+		}
+		div.jtable-main-container table.jtable tbody > tr > td {
+		  padding: 5px;
+		  border-left: 1px dotted #bebebe;
+		}
+		div.jtable-main-container table.jtable tbody > tr > td:first-child {
+		  border-left: none;
+		}
+		div.jtable-main-container table.jtable tbody > tr > td .jtable-edit-command-button {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269384&c=3500213&h=1b0176a67475fbe57852') no-repeat;
+		  width: 16px;
+		  height: 16px;
+		}
+		div.jtable-main-container table.jtable tbody > tr > td .jtable-delete-command-button {
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269388&c=3500213&h=ebe613b468290c8bb6ce') no-repeat;
+		  width: 16px;
+		  height: 16px;
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-even {
+		  background: #f0f0f0;
+		}
+		div.jtable-main-container table.jtable tbody > tr:hover {
+		  background: #e8eaef;
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-selected {
+		  -webkit-text-shadow: 0 1px 0 #333333;
+		  text-shadow: 0 1px 0 #333333;
+		  color: #000000;
+		}
+                /*FCFCFC   #333333  */
+		div.jtable-main-container table.jtable tbody > tr.jtable-child-row > td {
+		  background-color: #ababab;
+		  padding: 1px 0px;
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-child-row > td .jtable {
+		  border: none;
+		  border-bottom: 1px solid #C8C8C8;
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-child-row > td .jtable-title,
+		div.jtable-main-container table.jtable tbody > tr.jtable-child-row > td .jtable-bottom-panel {
+		  -webkit-border-radius: 0px;
+		  -moz-border-radius: 0px;
+		  border-radius: 0px;
+		  border: none;
+		}
+		div.jtable-main-container div.jtable-bottom-panel {
+		  -webkit-border-radius: 0px 0px 3px 3px;
+		  -moz-border-radius: 0px 0px 3px 3px;
+		  border-radius: 0px 0px 3px 3px;
+		  padding: 1px;
+		  background: #fff;
+		  border: 1px solid #C8C8C8;
+		  border-top: none;
+		  min-height: 24px;
+		  line-height: 16px;
+		  font-size: 0.9em;
+		}
+		div.jtable-main-container div.jtable-bottom-panel div.jtable-right-area {
+		  padding: 2px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list {
+		  margin: 2px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-space,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-first,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-last,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-previous,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-next,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-active {
+		  -webkit-text-shadow: 0 1px 0 #ffffff;
+		  text-shadow: 0 1px 0 #ffffff;
+		  background-color: #ebebeb;
+		  border-style: solid;
+		  border-width: 1px;
+		  border-color: #ffffff #b5b5b5 #b5b5b5 #ffffff;
+		  padding: 2px 5px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number:hover,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-first:hover,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-last:hover,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-previous:hover,
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-next:hover {
+		  background-color: #ddd;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-active {
+		  -webkit-text-shadow: 0 1px 0 #666666;
+		  text-shadow: 0 1px 0 #666666;
+		  color: #FCFCFC;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-info {
+		  margin-left: 5px;
+		  padding: 2px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record {
+		  margin: 3px;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record a {
+		  font-weight: bold;
+		  text-decoration: none;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record a:hover {
+		  text-decoration: underline;
+		}
+		div.jtable-main-container div.jtable-column-selection-container {
+		  -webkit-border-radius: 3px;
+		  -moz-border-radius: 3px;
+		  border-radius: 3px;
+		  -webkit-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		  -moz-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		  box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		}
+		form.jtable-dialog-form {
+		  font-family: Verdana, Arial, Helvetica, sans-serif;
+		  font-size: 11px;
+		  font-weight: 400;
+		}
+		form.jtable-dialog-form div.jtable-input-label {
+		  font-weight: bold;
+		}
+		div.jtable-busy-message {
+		  -webkit-text-shadow: 0 1px 0 #333333;
+		  text-shadow: 0 1px 0 #333333;
+		  -webkit-border-radius: 3px;
+		  -moz-border-radius: 3px;
+		  border-radius: 3px;
+		  -webkit-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		  -moz-box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		  box-shadow: 2px 2px 4px rgba(50, 51, 50, 0.75);
+		  color: #fff;
+		  border: 1px solid;
+		  padding: 3px 5px 5px 27px;
+		  background: url('https://system.netsuite.com/core/media/media.nl?id=269383&c=3500213&h=4f4985f399a30dcd9610') no-repeat;
+		  background-position: 5px;
+		}
+		div.jtable-main-container div.jtable-title {
+		  background: #eb6565;
+		  background: -moz-linear-gradient(top, #eb6565 0%, #9d0d0d 100%);
+		  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eb6565), color-stop(100%, #9d0d0d));
+		  background: -webkit-linear-gradient(top, #eb6565 0%, #9d0d0d 100%);
+		  background: -o-linear-gradient(top, #eb6565 0%, #9d0d0d 100%);
+		  background: -ms-linear-gradient(top, #eb6565 0%, #9d0d0d 100%);
+		  background: linear-gradient(to bottom, #eb6565 0%, #9d0d0d 100%);
+		  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eb6565', endColorstr='#9d0d0d', GradientType=0);
+		  border-color: #772b2b;
+		}
+		div.jtable-main-container div.jtable-title div.jtable-title-text {
+		  -webkit-text-shadow: 0 1px 0 #666666;
+		  text-shadow: 0 1px 0 #666666;
+		  color: #fff;
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-selected,
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-selected:hover {
+		  background-color: #D3EBF2;/*#ea2a2a;*/
+		}
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-created,
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-updated,
+		div.jtable-main-container table.jtable tbody > tr.jtable-row-deleting {
+		  background-color: #ea2a2a;
+		}
+		div.jtable-main-container div.jtable-bottom-panel .jtable-page-list .jtable-page-number-active {
+		  background-color: #b11515;
+		  border-color: #8f0000;
+		}
+		div.jtable-main-container div.jtable-bottom-panel span.jtable-add-record a {
+		  color: #772b2b;
+		}
+		div.jtable-busy-message {
+		  border-color: #772b2b;
+		  background-color: #ea2a2a;
+		}
+			
+	</style>
+	
+</head>
+
+<body>
+
+	<h3 style="color:white;">Configurable Image download</h3>
+	<hr />
+	
+
+	<div style="padding-top:10px">
+		<table id="tblFilters">
+			<tr>
+				<td>Leagues: </td>
+				<td>#LEAGUES#</td>
+				<td><img id='imgLoadingTeams' style='display:none;' src='https://system.netsuite.com/core/media/media.nl?id=269282&c=3500213&h=fa320314ec397a3dcd55' height='26' width='26' /></td>
+			</tr>
+			<tr>
+				<td>Teams: </td>
+				<td colspan="2">#TEAMS#</td>
+			</tr>
+			<tr>
+				<td>Product Type: </td>
+				<td colspan="2">#PROD_TYPE#</td>
+			</tr>
+			<tr>
+				<td>
+					<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" id="btnLoadSearch" onclick="loadSearch()">
+        				<span class="ui-button-text">Get Results</span>
+        			</button>
+                    <div id="pBarGetResults"></div>
+        		</td>
+        		<td colspan="2"><span id="msgSelectFilter" style="display:none;opacity: 0;color:red;">Please select at least one filter</span><span id="pBarGetResultsMessage" style="display: none;">Please wait while we load the records, this might take some time depending on your selected choices.</span></td>
+			</tr>
+			
+		</table>
+		
+	</div>
+	
+
+    <div id="gridContainer" style="overflow-x: hidden;height: 400px;margin-top: 50px;">
+	    <div id="searchResultContainer" style="width: 100%;overflow-y: hidden;"></div>
+    </div>
+
+    <div style="margin-top: 25px;">
+        <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" id="btnDownloadImages" disabled="disabled" style="opacity:0.5;" onclick="downloadImages()">
+        	<span class="ui-button-text">Download Images</span>
+        </button>
+        <div id="pBarDownloading"></div>
+        <div id="pBarDownloadingMessage" style="margin-top: 10px;color: white;display: none;">
+        	* Please be patient while we prepare your high resolution image and XLSX details download. For large batches, this could take up to 10 minutes.
+        </div>
+    </div>
+
+	<input type="hidden" name="custpage_selectedleague" id="custpage_selectedleague" />
+	
+	
+	<div id="dialog-message" title="Some error occured!">
+	  <p>
+	    We encountered an error while processing your request, this might be a temporary glitch, please try again later.
+	  </p>
+	</div>
+	
+	
+	<script>
+	  $(function() {
+	    $( "#dialog-message" ).dialog({
+	      modal: true,
+	      autoOpen: false,
+	      buttons: {
+	        Ok: function() {
+	          $( this ).dialog( "close" );
+	        }
+	      }
+	    });
+	  });
+  </script>
+	
+	
+</body>
+</html>

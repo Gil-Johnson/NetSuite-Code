@@ -1,0 +1,34 @@
+input[type=checkbox] {
+  transform: scale(1.5);
+}
+
+
+  input[type=checkbox] {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 17px;
+     visibility: hidden;
+}
+
+
+input[type=checkbox]:after {
+    content: " ";
+    background-color: #fff;
+    display: inline-block;
+    margin-left:10px;
+    padding-bottom:5px;
+    color:#00BFF0;
+    width:22px;
+    height:25px;
+    visibility: visible;
+    border:1px solid #00BFF0;
+    padding-left:3px;
+    border-radius:5px;
+}
+input[type=checkbox]:checked:after {
+    content: "\2714";
+      padding:-5px;
+      font-weight:bold;
+}

@@ -1,0 +1,22 @@
+<h1 ng-init="pageLoad()">Login to Vendor Portal</h1>
+<hr />
+<div ng-show="errorsSummary" id="errorsSummary" class="errorMessage left-5perc" >{{errorsSummary}}</div>
+<div class="col-xs-4 left-5perc">
+    <form role="form" name="loginForm" novalidate ng-app="vendorPortalApp" ng-controller="accountController">
+        <div class="form-group" ng-class="{'has-error': loginForm.username.$invalid && !loginForm.username.$pristine}">
+            <label for="username">Username:</label>
+            <input class="form-control" id="username" name="username" type="text" placeholder="Enter your username" required ng-model="username" />
+            <span class="help-block" ng-show="loginForm.username.$error.required && !loginForm.username.$pristine">Username is required</span>
+        </div>
+        <div class="form-group" ng-class="{'has-error': loginForm.password.$invalid && !loginForm.password.$pristine}">
+            <label for="password">Password:</label>
+            <input class="form-control" id="password" name="password" type="password" placeholder="Enter your password" required ng-model="password" />
+            <span class="help-block" ng-show="loginForm.password.$error.required && !loginForm.password.$pristine">Password is required</span>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary pull-right" value="Login" title="Login" ng-click="login()" ng-disabled="!loginForm.$valid">
+                <span>Login</span>
+            </button>
+        </div>
+    </form>
+</div>

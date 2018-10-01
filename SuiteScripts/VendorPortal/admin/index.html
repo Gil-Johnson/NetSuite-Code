@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+
+    <script src="https://system.netsuite.com/core/media/media.nl?id=322761&c=3500213&h=17df84abbe84501a33ad&_xt=.js"></script> <!--js/jquery.jtable.min.js-->
+    <script src="https://system.netsuite.com/core/media/media.nl?id=322863&c=3500213&h=c7e28b5aacbd30cf651d&_xt=.js"></script> <!--js/jquery.jtable.clientbinding.js-->
+
+
+    <style>/* #CSS# */</style>
+    <style>
+        .gridContainer {
+            overflow-x: hidden;
+            padding-top: 40px;
+        }
+        .mainGrid {
+            width: 100%;
+            overflow-y: hidden;
+        }
+        .head span {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        .col-1{
+            width: 12%;
+        }
+        .col-2{
+            width: 30%;
+        }
+        .col-3{
+            width: 5%;
+        }
+        .linebreaks {
+            white-space: pre;
+        }
+        .header-table {
+            margin-left: 1%;
+            width: 70%;
+        }
+        .header-table tr td:nth-child(2), .header-table tr td:nth-child(2) {
+            padding: 10px 0px;
+        }
+        .header-table tr td:first-child, .header-table tr td:nth-child(4) {
+            color: #8A8A8A;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="ui-corner-all" id="divMessageBox" style="padding: 10px; margin-bottom: 20px; display: none;"><span></span></div>
+
+<div id="panelListingPage">
+    <div class="head">
+        <span>Vendor: </span>
+        <select id="selectVendorList" onchange="evtVendorChange()">
+            <option value="-1"> - All Vendors - </option>
+        </select>
+    </div>
+</div>
+
+<div id="panelDetailsPage" style="display: none;">
+
+    <div>
+        <button id="btnAcceptChanges">Accept Changes</button>
+        <button id="btnRejectChanges">Reject Changes</button>
+        <button id="btnPoListing">PO Listing Screen</button>
+    </div>
+
+    <table class="header-table">
+        <tr>
+            <td class="col-1"></td><td class="col-2"></td>
+            <td class="col-3"></td>
+            <td class="col-1"></td><td class="col-2"></td>
+        </tr>
+        <tr>
+            <td>Purchase Order #</td><td id="txtPurchaseOrderNumber"></td>
+            <td></td>
+            <td>Warehouse</td><td id="txtWarehouse"></td>
+        </tr>
+        <tr>
+            <td>Ship Date</td><td id="txtShipDate"></td>
+            <td></td>
+            <td>New Ship Date</td><td id="txtNewShipDate"></td>
+        </tr>
+        <tr>
+            <td>Vendor</td><td class="linebreaks" id="txtVendorAddress"></td>
+            <td></td>
+            <td>Ship to Address</td><td class="linebreaks" id="txtShipToAddress"></td>
+        </tr>
+        <tr>
+            <td>Cancel Date</td><td id="txtCancelDate"></td>
+            <td></td>
+            <td>New Cancel Date</td><td id="txtNewCancelDate"></td>
+        </tr>
+        <tr>
+            <td>Receive By</td><td id="txtReceiveBy"></td>
+            <td></td>
+            <td>New Receive By</td><td id="txtNewReceiveBy"></td>
+        </tr>
+        <tr>
+            <td>Vendor Comments</td><td class="linebreaks" id="txtComments"></td>
+            <td></td>
+            <td></td><td></td>
+        </tr>
+
+    </table>
+
+    <div id="dialog-accept-changes" title="Accept Changes?">
+        <p></p>
+    </div>
+
+    <div id="dialog-reject-changes" title="Reject Changes?">
+        <p></p>
+    </div>
+
+
+</div>
+
+<div id="gridContainerItemList" class="gridContainer">
+    <div id="searchResultContainerItemList" class="mainGrid"></div>
+</div>
+
+<script>/*admin_script*/</script>
+
+</body>
+</html>

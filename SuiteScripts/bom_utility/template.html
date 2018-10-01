@@ -1,0 +1,31 @@
+<style>
+    #tbl_bom_utility td{
+        padding: 5px;
+    }
+</style>
+
+<table id="tbl_bom_utility">
+    <tr>
+        <td>Current Item</td>
+        <td>
+            <div id='div_bom_items'>
+                <img src='https://system.na3.netsuite.com/core/media/media.nl?id=258805&c=3500213&h=f9555a4767aeef9e93ba' height="40px" />
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>New Item</td>
+        <td>
+            <div id='div_all_items'>
+                <img src='https://system.na3.netsuite.com/core/media/media.nl?id=258805&c=3500213&h=f9555a4767aeef9e93ba' height="40px" />
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan='2' style='text-align: center'>
+            <button id = "btnSwap" disabled onclick = "swap_associated_items(); return false;">Swap</button>
+            <button id = "btnRemove" onclick = "remove_associated_items(); return false;">Remove</button>
+        </td>
+    </tr>
+
+</table>

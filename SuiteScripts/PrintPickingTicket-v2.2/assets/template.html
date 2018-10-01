@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="{{ w2ui-1.4.3.min.css }}" />-->
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="{{ ui.jqgrid-bootstrap.css }}" />-->
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="{{ bootstrap-datepicker3.min.css }}" />-->
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="{{ f3.ppt.css }}" />-->
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ f3.ppt.min.css }}" />
+
+
+    <meta charset="utf-8" />
+    <title>{{ title }}</title>
+</head>
+<body class="{{ standaloneClass }}">
+
+<!-- we need this class on both elements. body is used for standalone, below div is used for inline in netsuite -->
+<div class="{{ standaloneClass }}">
+
+    <div class="rico-ppt">
+
+        <div class="filters container-fluid">
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a id="filter_panel_id" role="button" href="#">- Filters</a>
+                    </h3>
+                </div>
+                <div class="panel-body-wrapper collapse in">
+                    <div class="panel-body">
+                        <div class="form-horizontal">
+
+                            <div class="row">
+                                <div class="col-sm-4">
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="printed_picking_ticket" class="control-label">Printed Picking Ticket</label>
+                                                <div class="">
+                                                    <select class="form-control printed-picking-ticket-dropdown"
+                                                            id="printed_picking_ticket"
+                                                            name="printed_picking_ticket">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0" selected="selected">No</option>
+                                                        <option value="">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="warehouse" class="control-label">Warehouse</label>
+                                                <div class="">
+                                                    <select class="form-control warehouse-dropdown"
+                                                            id="warehouse"
+                                                            name="warehouse">
+                                                        <option selected="selected"> </option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="ready_to_print" class="control-label">Ready To Print</label>
+                                                <div class="">
+                                                    <select class="form-control ready-to-print-dropdown"
+                                                            id="ready_to_print"
+                                                            name="ready_to_print">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0" selected="selected">No</option>
+                                                        <option value="">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="ship_date_from" class="control-label">Ship Date From</label>
+                                                <div class="">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control ship-date-from-text"
+                                                               id="ship_date_from"
+                                                               name="ship_date_from"/>
+                                                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="print_status" class="control-label">Print Status</label>
+                                                <div class="">
+                                                    <input type="text" class="form-control print-status-text"
+                                                           id="print_status"
+                                                           name="print_status" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="ship_date_to" class="control-label">Ship Date To</label>
+                                                <div class="">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control ship-date-to-text"
+                                                               id="ship_date_to"
+                                                               name="ship_date_to"/>
+                                                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="hard_cancel" class="control-label">Hard Cancel</label>
+                                                <div class="">
+                                                    <select class="form-control backordered-quantity-dropdown"
+                                                            id="hard_cancel"
+                                                            name="hard_cancel">
+                                                        <option value="" selected="selected">All</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="last_ship_date_from" class="control-label">Last Ship Date From</label>
+                                                <div class="">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control ship-date-from-text"
+                                                               id="last_ship_date_from"
+                                                               name="last_ship_date_from"/>
+                                                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="drop_ship" class="control-label">Drop Ship</label>
+                                                <div class="">
+                                                    <select class="form-control backordered-quantity-dropdown"
+                                                            id="drop_ship"
+                                                            name="drop_ship">
+                                                        <option value="" selected="selected">All</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="last_ship_date_to" class="control-label">Last Ship Date To</label>
+                                                <div class="">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control ship-date-to-text"
+                                                               id="last_ship_date_to"
+                                                               name="last_ship_date_to"/>
+                                                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="hot_market_order" class="control-label">Hot Market Order</label>
+                                                <div class="">
+                                                    <select class="form-control hot-market-order-dropdown"
+                                                            id="hot_market_order"
+                                                            name="hot_market_order">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="item" class="control-label">Custom Order</label>
+                                                <div class="">
+                                                    <select class="form-control custom-order-dropdown"
+                                                            id="custom_order"
+                                                            name="custom_order">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="display_order" class="control-label">Display Order</label>
+                                                <div class="">
+                                                    <select class="form-control display_order-dropdown"
+                                                            id="display_order"
+                                                            name="display_order">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--ahmed-->
+                                        <div class="col-sm-6" >
+                                            <div class="form-group" >
+                                                <!--<label for="item" class="control-label" >Allow Substitutions</label>-->
+                                                <div class="checkbox" style="margin-top:0px">
+                                                    <label  style="font-weight: 700;">Allow Substitutions</label>
+                                                    <div class="">
+                                                        <select class="form-control display_order-dropdown"
+                                                                id=""
+                                                                name="Allow_Subs">
+                                                            <option value="1">Yes</option>
+                                                            <option value="0">No</option>
+                                                            <option value="" selected="selected">All</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                             <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="cs_order_management" class="control-label"> CS Order Management </label>
+                                                <div class="">
+                                                    <select class="form-control order-management-order-dropdown"
+                                                            id="cs_order_management"
+                                                            name="cs_order_management">
+                                                        <option value="1">North</option>
+                                                        <option value="2">South</option>
+                                                        <option value="3">DropShip</option>
+                                                        <option value="4">EDI</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                </div>                          
+                                    
+                                    
+                                    
+                                    
+                                    
+                                </div>
+                                <div class="col-sm-4">
+
+                                    <div class="form-group has-feedback">
+                                        <label for="customer" class="control-label">Customer Is</label>
+                                        <div class="">
+                                            <input class="typeahead form-control customer-dropdown"
+                                                   id="customer"
+                                                   name="customer"
+                                                   type="text" />
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group has-feedback">
+                                        <label for="customer_is_not" class="control-label">Customer Is Not</label>
+                                        <div class="">
+
+                                            <input class="typeahead form-control customer-is-not-dropdown"
+                                                   id="customer_is_not"
+                                                   name="customer_is_not"
+                                                   type="text" />
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label for="purchase_order_number" class="control-label">PO#</label>
+                                        <div class="">
+                                            <input type="text" class="form-control purchase-order-number-text"
+                                                   id="purchase_order_number"
+                                                   name="purchase_order_number"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="status" class="control-label">Status</label>
+                                        <div class="">
+                                            <select class="form-control status-dropdown"
+                                                    id="status"
+                                                    multiple="multiple"
+                                                    size="5"
+                                                    name="status">
+                                                <option value="SalesOrd:A">Sales Order:Pending Approval</option>
+                                                <option value="SalesOrd:B">Sales Order:Pending Fulfillment</option>
+                                                <option value="SalesOrd:C">Sales Order:Cancelled</option>
+                                                <option value="SalesOrd:D">Sales Order:Partially Fulfilled</option>
+                                                <option value="SalesOrd:E">Sales Order:Pending Billing/Partially Fulfilled</option>
+                                                <option value="SalesOrd:F">Sales Order:Pending Billing</option>
+                                                <option value="SalesOrd:G">Sales Order:Billed</option>
+                                                <option value="SalesOrd:H">Sales Order:Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="partner" class="control-label">Partner</label>
+                                        <div class="">
+                                            <select class="form-control partner-dropdown"
+                                                    id="partner"
+                                                    name="partner">
+                                                <option value="" selected="selected"> </option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-4">
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="item" class="control-label">Item</label>
+                                                <div class="">
+                                                    <input type="text" class="form-control item-text"
+                                                           id="item"
+                                                           name="item" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="item_discontinued" class="control-label">Item Discontinued?</label>
+                                                <div class="">
+                                                    <select class="form-control item-discontinued-dropdown"
+                                                            id="item_discontinued"
+                                                            name="item_discontinued">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0" >No</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="product_type" class="control-label">Product Type</label>
+                                                <div class="">
+                                                    <select class="form-control product-type-dropdown"
+                                                            id="product_type"
+                                                            name="product_type">
+                                                        <option value="" selected="selected"> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="item_is_inactive" class="control-label">Item Is InActive?</label>
+                                                <div  class="">
+                                                    <select class="form-control item-is-inactive-dropdown"
+                                                            id="item_is_inactive"
+                                                            name="item_is_inactive">
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                        <option value="" selected="selected">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label for="league" class="control-label">League</label>
+                                                <div class="">
+                                                    <select class="form-control league-dropdown"
+                                                            id="league"
+                                                            name="league"
+                                                            multiple="multiple"
+                                                            size="5">
+                                                        <option value="" selected="selected"> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="team" class="control-label">Team</label>
+                                                <div class="">
+                                                    <select class="form-control team-dropdown"
+                                                            id="team"
+                                                            name="team"
+                                                            multiple="multiple"
+                                                            size="5">
+                                                        <option value="" selected="selected"> </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" id="backordered_quantity">
+                                                <label for="backordered_quantity" class="control-label">BO Qty</label>
+                                                <div class="">
+                                                    <select class="form-control backordered-quantity-dropdown"
+                                                            id="backordered_quantity"
+                                                            name="backordered_quantity">
+                                                        <option value="" selected="selected">N/A</option>
+                                                        <option value="any">Any</option>
+                                                        <option value="some">Some</option>
+                                                        <option value="all">All</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group" id="items_committed">
+                                                <label for="items_committed" class="control-label">Items Committed</label>
+                                                <div class="">
+                                                    <select class="form-control backordered-quantity-dropdown"
+                                                            id="items_committed"
+                                                            name="items_committed">
+                                                        <option value="" selected="selected">Ignore</option>
+                                                        <option value="all">All</option>
+                                                        <option value="some">Some</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                              <div class="form-group">
+                                        <label for="commit_status" class="control-label">Commited Status</label>
+                                        <div class="">
+                                            <select class="form-control commit_status-ticket-dropdown"
+                                                    id="commit_status"
+                                                    name="commit_status">
+                                                <option value="1">Fully Committed</option>
+                                                <option value="2">Partially Committed</option>
+                                                <option value="" selected="selected">Ignore</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <button type="button" class="btn btn-primary btn-apply-filters">Apply Filters</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-grid container-fluid">
+            <div class="panel panel-default"><div class="panel-heading">
+                <h3 class="panel-title">
+                    Sales Order List
+                </h3>
+            </div><div class="panel-footer">
+                <div class="pull-left">
+                    <button class="btn btn-default" id="btn_mark_all">Mark All</button>
+                    <button class="btn btn-default" id="btn_unmark_all">Unmark All</button>
+
+                    <button type="button" class="btn btn-default" id="btn_swap_item"
+                            data-toggle="modal" data-target="#swapItemModal" disabled="disabled">
+                        Swap Item
+                    </button>                 
+                    
+                     <button type="button" class="btn btn-default" id="btn_swap_ship_date"
+                            data-toggle="modal" data-target="#swapShipDateModal">
+                        Swap Ship Date
+                    </button>                   
+                                  
+                    <input id="shipdatechanger" type="text">  
+                    
+             <!-- <button class="btn btn-success" id="btn_export_to_excel">Export To Excel</button>  -->       
+                </div>
+
+                <div class="text-right">
+
+                        <span class="pagination-label"></span>
+                        <button class="btn btn-default" id="btn_previous">Previous</button>
+                        <button class="btn btn-default" id="btn_next">Next</button>
+
+                        &nbsp;
+
+                        <button type="button" class="btn btn-success btn-submit">Submit Changes</button>
+                    </div>
+                </div>
+                <div class="xpanel-body">
+                    <table id="jqGrid"></table>
+                    <!--<div id="jqGrid" style="width: 100%; height: 550px;"></div>-->
+                    <div id="jqGridPager"></div>
+                    <div class="empty-grid-message">
+                        <div class="alert alert-info">
+                            <b>No records found.</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="swapItemModal" tabindex="-1" role="dialog" aria-labelledby="Swap Item Modal">
+        <div class="modal-dialog modal-sm"  style="margin-top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Swap Item</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="swap_item" class="control-label">Item</label>
+                            <div class="">
+                                <input type="text" class="form-control swap-item-text"
+                                       id="swap_item"
+                                       name="swap_item" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn_swap_modal_ok">OK</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <div class="modal fade" id="swapShipDateModal" tabindex="-1" role="dialog" aria-labelledby="Swap Ship Date Modal">
+        <div class="modal-dialog modal-sm"  style="margin-top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Swap Ship Date</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success" style="display: none;">
+                        Processing...
+                    </div>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="swap_ship_date" class="control-label">Ship Date</label>
+                            <div class="">
+                                <div class="input-group date">
+                                    <input type="text" class="form-control swap-ship-date-text"
+                                           id="swap_ship_date"
+                                           name="swap_ship_date"/>
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="modalok" class="btn btn-primary btn_ship_date_modal_ok">OK</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <div class="modal fade" id="submitChangesSuccessModal" tabindex="-1" role="dialog" aria-labelledby="Submit Changes Modal">
+        <div class="modal-dialog" style="margin-top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Successful</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        Your changes have been submitted successfully. They will be processed soon
+                        and you will be notified via email upon completion.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+</div>
+
+
+<script>
+    window.$ = (window.NS && window.NS.jQuery) || window.jQuery;
+    window.pageType = '{{ type }}';
+    window.apiSuiteletUrl = '{{ apiSuiteletUrl }}';
+    
+    document.getElementById("shipdatechanger").style.visibility = "hidden";
+    
+    $( document ).ready(function() {            
+        // 	$('#swap_ship_date').change(function() {
+     	   $( "#modalok" ).click(function() {
+         	   //  alert($('#swap_ship_date').val());  
+         	    
+         	//   $('.input-group.ship-date').datepicker("setDate", $('#swap_ship_date').val());
+         	
+         	   $('#shipdatechanger').val($('#swap_ship_date').val());
+         	});
+     	  
+         	
+         	
+         });
+    
+    var docTitle = document.title;
+    if(docTitle == 'Order Review Form - NetSuite (Rico Industries,Inc)'){    
+    	document.getElementById("items_committed").style.visibility = "hidden";
+    	document.getElementById("backordered_quantity").style.visibility = "hidden";   	
+    	
+    }
+</script>
+<script type="text/javascript"> window.jQuery || document.write('<script src="{{ jquery-1.11.0.min.js }}">\x3C/script>')</script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+<!--<script type="text/javascript" src="{{ underscore-min.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ jstorage.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ fiber.min.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ typeahead.jquery.min.js }}"></script>-->
+
+<script type="text/javascript" src="{{ bootstrap-datepicker.min.js }}"></script>
+<script type="text/javascript" src="{{ grid.locale-en.js }}"></script>
+<script type="text/javascript" src="{{ jquery.jqGrid.min.js }}"></script>
+
+<!--<script type="text/javascript" src="{{ f3.tooltip-manager.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ f3.state-manager.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ f3.data-manager.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ f3.ui-manager.js }}"></script>-->
+<!--<script type="text/javascript" src="{{ f3.init.js }}"></script>-->
+<script type="text/javascript" src="{{ f3.ppt.min.js }}"></script>
+
+
+
+
+</body>
+</html>

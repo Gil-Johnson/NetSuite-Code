@@ -1,0 +1,114 @@
+<style>
+    hr {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+    .progressDownloading, .progressDownloadingProdFiles {
+        display: none;
+    }
+    img.progressDownloading, img.progressDownloadingProdFiles {
+        height: 30px;
+    }
+    .gridContainer {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+</style>
+
+<div class="pull-right">
+    Welcome <b>{{VendorName}}</b>&nbsp;&nbsp;&nbsp;<a href="#/logout">Sign out</a>
+</div>
+<h1 ng-init="pageLoad()">Vendor Portal</h1>
+<hr />
+
+<div ng-show="errorMessage" class="errorMessage" >{{errorMessage}}</div>
+
+<div>
+
+    <h3><b><u>{{PoDetailHeading}}</u></b></h3>
+
+    <table style="margin-bottom: 50px" class="header-table">
+        <tr>
+            <td class="col-1"></td><td class="col-2"></td>
+            <td class="col-3"></td>
+            <td class="col-1"></td><td class="col-2"></td>
+        </tr>
+        <tr>
+            <td>Purchase Order #</td><td>{{PurchaseOrderNumber}} <img src="{{PdfImage}}" ng-click="printPDF()" class="pdfPrint" /></td>
+            <td></td>
+            <td>Cancel Date</td><td>{{CancelDate}}</td>
+        </tr>
+        <tr>
+            <td>Ship Date</td><td>{{ShipDate}}</td>
+            <td></td>
+            <td>Receive By</td><td>{{ReceiveBy}}</td>
+        </tr>
+        <tr>
+            <td>Vendor</td><td class="linebreaks">{{VendorAddress}}</td>
+            <td></td>
+            <td>Ship to Address</td><td class="linebreaks">{{ShipToAddress}}</td>
+        </tr>
+        <tr>
+            <td>Warehouse</td><td>{{Warehouse}}</td>
+            <td></td>
+            <td>PO Shipping Instructions</td><td class="linebreaks">{{ShippingInstructions}}</td>
+        </tr>
+    </table>
+
+    <button class="btn" value="GoBack" title="Go Back" ng-click="backButtonClick()">
+        <span>Go Back</span>
+    </button>
+    <button class="btn btn-primary" value="RequestChanges" title="Request Changes" ng-click="requestChanges()" ng-show="!isAcceptedOrder">
+        <span>Request Changes</span>
+    </button>
+    <button class="btn btn-primary" value="AcceptOrder" title="Accept Order" ng-click="acceptOrder()" ng-show="isNewOrder">
+        <span>Acknowledge Order</span>
+    </button>
+
+    <button class="btn btn-primary btnDownloadSpecsSheet" value="DownloadSpecsSheet" title="Download All Items Specs Sheet" ng-click="downloadSpecsSheet()" ng-show="!isNewOrder">
+        <span class="downloadSpecsSheetSpan">Download All Items Specs Sheet</span>
+        <span class="progressDownloading">Downloading...</span>
+    </button>
+    <img class="progressDownloading" src="" />
+
+    <button class="btn btn-primary btnDownloadProdFiles" value="DownloadProdFiles" title="Download Selected Production Files" ng-click="downloadProdFiles()">
+        <span class="downloadProdFilesSpan">Download Selected Production Files</span>
+        <span class="progressDownloadingProdFiles">Downloading...</span>
+    </button>
+    <img class="progressDownloadingProdFiles" src="" />
+
+    <div id="gridContainerItemList" class="gridContainer">
+        <div id="searchResultContainerItemList" class="mainGrid"></div>
+    </div>
+
+    <button class="btn" value="GoBack" title="Go Back" ng-click="backButtonClick()">
+        <span>Go Back</span>
+    </button>
+    <button class="btn btn-primary" value="RequestChanges" title="Request Changes" ng-click="requestChanges()" ng-show="!isAcceptedOrder">
+        <span>Request Changes</span>
+    </button>
+    <button class="btn btn-primary" value="AcceptOrder" title="Accept Order" ng-click="acceptOrder()" ng-show="isNewOrder">
+        <span>Acknowledge Order</span>
+    </button>
+
+    <button class="btn btn-primary btnDownloadSpecsSheet" value="DownloadSpecsSheet" title="Download All Items Specs Sheet" ng-click="downloadSpecsSheet()" ng-show="!isNewOrder">
+        <span class="downloadSpecsSheetSpan">Download All Items Specs Sheet</span>
+        <span class="progressDownloading">Downloading...</span>
+    </button>
+    <img class="progressDownloading" src="" />
+
+    <button class="btn btn-primary btnDownloadProdFiles" value="DownloadProdFiles" title="Download Selected Production Files" ng-click="downloadProdFiles()">
+        <span class="downloadProdFilesSpan">Download Selected Production Files</span>
+        <span class="progressDownloadingProdFiles">Downloading...</span>
+    </button>
+    <img class="progressDownloadingProdFiles" src="" />
+
+</div>
+
+<div id="dialog-confirm-accept" title="Acknowledge Order?">
+    <p>Are you sure you want to acknowledge this order?</p>
+</div>
+
+<div id="dialog-custom-message" title="">
+    <p></p>
+</div>

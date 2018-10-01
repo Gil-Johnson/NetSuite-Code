@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html ng-app="vendorPortalApp">
+<head>
+    <title></title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/blitzer/jquery-ui.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322959&c=3500213&h=4feb9089139847188c2d&_xt=.js"></script>  <!--js/constants.js-->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322758&c=3500213&h=9b06c52ed48c88e85ced&_xt=.js"></script>  <!--js/angular.min.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322759&c=3500213&h=ef43ea5987af6204b6fc&_xt=.js"></script> <!-- js/ui-bootstrap-tpls-0.10.0.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322762&c=3500213&h=65dab6619fbf7e678001&_xt=.js"></script> <!-- js/angular-route.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322866&c=3500213&h=f26809b43c40dc40ad16&_xt=.js"></script> <!-- js/jquery.cookie.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322761&c=3500213&h=17df84abbe84501a33ad&_xt=.js"></script> <!--js/jquery.jtable.min.js-->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322863&c=3500213&h=c7e28b5aacbd30cf651d&_xt=.js"></script> <!--js/jquery.jtable.clientbinding.js-->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322861&c=3500213&h=ac5606db6d5c1c07f4fc&_xt=.js"></script> <!-- js/script.js -->
+
+
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=323058&c=3500213&h=b7433ba8b8773dee4fe7&_xt=.js"></script> <!-- js/controllers/mainController.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322862&c=3500213&h=61fee825a1351e11d6f9&_xt=.js"></script> <!-- js/controllers/dashboardController.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322864&c=3500213&h=9870895996d911028879&_xt=.js"></script> <!-- js/controllers/accountController.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322858&c=3500213&h=8f8f17a98a706d71a36a&_xt=.js"></script> <!-- js/controllers/poDetailController.js -->
+    <script src="https://system.na3.netsuite.com/core/media/media.nl?id=322767&c=3500213&h=61aeacfd9127c25771e9&_xt=.js"></script> <!-- js/controllers/poRequestChangesController.js -->
+
+	<style>/* #CSS# */</style>
+    <style>
+        .ui-datepicker {
+            font-size : 0.8em;
+        }
+        body {
+            background-color: black;
+            color: white;
+            padding-right: 10px;
+            padding-left: 10px;
+        }
+        .errorMessage {
+            color: #b94a48;
+            padding-bottom: 20px;
+        }
+        hr {
+            padding-bottom: 50px;
+        }
+        .left-5perc {
+            margin-left: 5%;
+        }
+        .gridContainer {
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+        .mainGrid {
+            width: 100%;
+            overflow-y: hidden;
+        }
+        .col-1{
+            width: 12%;
+        }
+        .col-2{
+            width: 30%;
+        }
+        .col-3{
+            width: 5%;
+        }
+        .linebreaks {
+            white-space: pre;
+        }
+        .pull-right {
+            padding-right: 20px;
+        }
+        .field-validation-error {
+            border: 2px solid red;
+        }
+        .header-table {
+            margin-left: 1%;
+        }
+        .header-table tr td:nth-child(2), .header-table tr td:nth-child(2) {
+            padding: 10px 0px;
+        }
+        .header-table tr td:first-child, .header-table tr td:nth-child(4) {
+            color: #8A8A8A
+        }
+        .pdfPrint {
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="main">
+        <!-- angular templating -->
+        <!-- this is where content will be injected -->
+        <div ng-view></div>
+    </div>
+</body>
+</html>

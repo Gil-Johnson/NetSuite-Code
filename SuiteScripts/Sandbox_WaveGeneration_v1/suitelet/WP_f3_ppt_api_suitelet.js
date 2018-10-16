@@ -1,0 +1,528 @@
+
+/**
+ * Created by zshaikh on 8/26/2015.
+ * TODO:
+ * -
+ * Referenced By:
+ * -
+ * -
+ * Dependencies:
+ * -
+ * -
+ */
+
+/**
+ * F3_PPT_ class that has the actual functionality of suitelet.
+ * All business logic will be encapsulated in this class.
+ */
+var F3BaseAPISuitelet = Fiber.extend(function () {
+
+    'use strict';
+
+    return {
+
+        searchId: '',
+
+        init: function (request, response) {
+
+        },
+
+        /**
+         * main method
+         */
+        main: function (request, response) {
+            F3.Util.Utility.logDebug('F3_PPT_API_Suitelet.main();');
+            var mainRequestTimer = F3.Util.StopWatch.start('F3_PPT_API_Suitelet.main();');
+
+
+            var result = {};
+            var action = request.getParameter('action');
+            var params = request.getParameter('params');
+            var callback = request.getParameter('callback');
+            var salesordersDAL = new SalesOrdersDAL();
+
+            if (!!params) {
+                params = JSON.parse(params);
+            }
+
+            F3.Util.Utility.logDebug('F3_PPT_API_Suitelet.main(); // action = ', action);
+            F3.Util.Utility.logDebug('F3_PPT_API_Suitelet.main(); // params = ', JSON.stringify(params));
+
+            try {
+                if (action === 'get_salesorders') {
+
+                    // fetch data from API.
+                    var salesordersDALTimer = F3.Util.StopWatch.start('SalesOrdersDAL.getPending();');
+                    var filters = params;
+
+                    salesordersDAL.searchId = this.searchId;
+                    var records = salesordersDAL.getPending(filters);
+                    salesordersDALTimer.stop();
+
+                    result.data = records;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+
+                }
+                else if (action === 'get_partners') {
+                    var partners = CommonDAL.getPartners();
+                    result.data = partners;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_dsiusers') {
+                    var dsiUsers = CommonDAL. getDSIUsers();
+                    result.data = dsiUsers;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_orderchannels') {
+                    var ordeChannels = CommonDAL.getOrderChannels();
+                    result.data = ordeChannels;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if(action === 'get_product_types') {
+                    //customrecord_producttypes
+                    var productTypes = CommonDAL.getProductTypes();
+                    result.data = productTypes;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_locations') {
+                    var locations = CommonDAL.getLocations();
+                    result.data = locations;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_leagues') {
+                    var leagues = CommonDAL.getLeagues();
+                    result.data = leagues;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_teams') {
+                    var teams = CommonDAL.getTeams(params.league_id);
+                    result.data = teams;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_customers') {
+                    var customers = CommonDAL.getCustomers(params);
+                    result.data = customers;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action === 'get_items') {
+                    var items = CommonDAL.getItems(params);
+                    result.data = items;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if (action == 'get_customer_info') {
+                    var customerId = request.getParameter('customer_id');
+                    var items = CommonDAL.getCustomerInfo(customerId);
+                    result.data = items;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                } 
+                else if (action === 'submit') {
+
+                    var data = params;
+                    var salesorderData = data.salesorders;
+
+                    //salesordersDAL.updateOrders(salesorderData);
+
+                    this.submitSelectedRecords(data.checkbox, salesorderData);
+
+                    result.data = true;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else {
+                    result.status_code = 400;
+                    result.status = 'Bad Request';
+                    result.message = "invalid parameters";
+                }
+            }
+            catch (ex) {
+                F3.Util.Utility.logException('F3_PPT_API_Suitelet.main();', ex.toString());
+
+                result.status_code = 500;
+                result.status = 'Internal server error';
+                result.message = ex.toString();
+            }
+
+            var json = JSON.stringify(result);
+
+            F3.Util.Utility.logDebug('this.searchId: ', this.searchId);
+            F3.Util.Utility.logDebug('Response: ', json);
+
+            if (!!callback) {
+                json = callback + '(' + json + ')';
+            }
+
+            response.setContentType('JSON');
+            response.writeLine(json);
+
+            mainRequestTimer.stop();
+        }
+    };
+});
+
+
+
+
+
+var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
+
+    return {
+        init: function(request, response) {
+            this.base = Fiber.proxy(base, this);
+            this.base.init();
+            this.searchId = 'customsearch_reopensalesorders_2_2_2__58';
+            this.main(request, response);
+        },
+
+        submitSelectedRecords: function(checkbox, salesorders){
+            // if all records are empty, then return
+            if (checkbox.orders.length <= 0 &&
+                checkbox.items.length <= 0 &&
+             //   checkbox.prints.length <= 0 && 
+                salesorders.lengh <= 0 ) 
+             {
+                return;
+            }
+   
+            // Governance Unit: 26
+            var checkboxData = {
+                wavepicking_item_list: JSON.stringify(checkbox),
+                salesorders: salesorders
+            };
+
+            F3.Util.Utility.logDebug('finalsubmittingdata', JSON.stringify(checkboxData));            
+            F3.Util.Utility.logDebug('salesorders', JSON.stringify(checkbox.orders));
+            
+            var search = nlapiLoadSearch('item', 'customsearch5005');
+        	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
+        	search.addFilter(newFilter);
+        	
+        	var resultSet = search.runSearch();
+        	
+        	//nlapiLogExecution('DEBUG','SL testing' , resultSet.length );  	
+        	
+        	//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
+        	  var isKit = false;
+        	  var parentVal = "";
+       // 	  var parentTxt = "";
+       // 	  var parentLine = "";
+        	  var parentQty = null;
+        	  var excludeMembers = false;
+        	  var itemJSON = [];
+        	  
+        	  
+        	  resultSet.forEachResult(function(searchresult)
+        	  {
+        	
+        		  
+        	       var record = searchresult.getValue('internalid');
+                   var itemtype = searchresult.getValue('type');                   
+//                   var rectype = "";       	
+//		               	if(itemtype == "Assembly"){               		
+//		               		rectype = "assemblyitem";               		
+//		               	}else if (itemtype == "Kit" ){               		
+//		               		rectype = "kititem";              		
+//		               	}else if (itemtype == "InvtPart"){               		
+//		               		rectype = "invenotryitem";               		
+//		               	}else{               		
+//		               		rectype = "not found";
+//		               	}          
+        	   //    var itemtxt = searchresult.getValue( 'name');
+        	       var iskitmember = searchresult.getValue( 'formulatext');
+        	   //    var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction');
+        	       var qty = searchresult.getValue( 'quantity', 'transaction');
+        	    //   var qtyRec = searchresult.getValue( 'quantityshiprecv', 'transaction');
+        	       var qtyPicked = searchresult.getValue( 'quantitypicked', 'transaction');
+        	  
+        	       
+        	       var qtyOpen = (qty - qtyPicked);
+        	       if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
+        	    	   excludeMembers = true;	    	   
+        	       }
+        	       
+        	       if(qtyOpen > 0 && iskitmember != 'kitmbr'){
+        	    	   excludeMembers = false;	    	   
+        	       }
+        	      
+        	       var itemObj = {        		  
+        		    	   itemId:record,
+        		      	   openQty: qtyOpen,
+        		      	   itemtype: itemtype,
+        		           iskitmember: iskitmember
+        		      	   
+        		     };
+        	       
+        	       if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
+        	    	   parentVal =  null;
+        	    	   parentTxt = null;
+        	    	   parentLine = null;
+        	       }
+        	       
+        	       if(itemtype == 'Kit'){	// if item is kit set parent up    	 
+        	    	  parentVal = record;
+        	    	//  parentTxt = itemtxt;
+        	    	//  parentLine = line;
+        	    	  parentQty = qty;
+        	       }
+        	       
+        	       if(iskitmember == 'kitmbr' && parentVal != null){ 		    	  
+        	    	   
+        	    	// want to push parent to kit
+        	    	   itemObj['parentId'] = parentVal;
+        	    	//   itemObj['parentName'] = parentTxt;
+        	    	//   itemObj['parentLine'] = parentLine;
+        	    	   itemObj['memberQty'] = qty/parentQty;
+        	    	   
+        		    }          	       
+        	       
+        	       
+        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true){
+        	    	   
+        	    //	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
+        	    	   
+        	       }else{
+        	    	   
+        	    	  // var isInArray = _.find(itemJSON, { 'itemId': record });
+        	    	   var index = _.findIndex(itemJSON, {'itemId': record});
+        	    	   
+        	    	   parseInt(index);
+        	    	   
+        	    	   if(index != -1){ 
+        	    		   
+        	    		//   nlapiLogExecution('DEBUG','index != -1', index);
+        	    		   
+        	    		var newTotal = parseFloat(itemJSON[index].openQty) + parseFloat(qtyOpen);  
+        	    	   
+        	    	//   nlapiLogExecution('DEBUG','Logger: '+ record + ' ::' + qtyOpen , 'old qty: ' + itemJSON[index].openQty + '  new qty: ' + newTotal);
+        	    	   
+        	    	   itemJSON[index].openQty = newTotal;        	    	 
+        	    	  
+        	    	   
+        	    	 //  nlapiLogExecution('DEBUG','new qty' , itemJSON[index].openQty);
+        	    	   
+        	    	   }else{
+        	    		   
+        	    		 //  nlapiLogExecution('DEBUG','index is -1', index);
+        	    		   
+        	    		   itemJSON.push(itemObj); 
+        	    		   
+        	    		 //  nlapiLogExecution('DEBUG','item does not exist', index);
+        	    	   }
+        	    	  
+        	    	   
+        	       }
+        	           
+        	     //  nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
+        	 	  return true;                // return true to keep iterating
+        	 	  
+        	   });          	  
+        	          	
+    
+           
+//        	  nlapiLogExecution('DEBUG','json data' , JSON.stringify(JSONobj) ); 
+            
+            var columns = new Array();
+            columns[0] = new nlobjSearchColumn( 'created');
+            columns[1] = new nlobjSearchColumn( 'custrecord_wave_increment');        
+            var waveRecords = nlapiSearchRecord( 'customrecord_wave', 'customsearch3886', null, columns );        
+            var wave_name = 'WV_';
+            var wave_increment = 0;
+            var date = new Date();            
+            if(checkbox.dropship == 1){
+                wave_name = 'DSWV_';
+            }
+            for ( var i = 0; waveRecords != null && i < waveRecords.length; i++ )
+            {
+               var searchresult = waveRecords[ i ];
+               var record = searchresult.getId( );
+               var rectype = searchresult.getRecordType( );
+               var createdDate = searchresult.getValue( 'created');
+               var increment = searchresult.getValue( 'custrecord_wave_increment');         
+              
+               wave_increment = parseInt(increment) + 1;
+               wave_name = wave_name + moment(date).format('MM/DD/YYYY')  + '_' + wave_increment;
+               break;              
+            }
+            if(waveRecords == null) {     
+               
+                wave_increment = 1;
+                wave_name = wave_name + moment(date).format('MM/DD/YYYY') + '_' + wave_increment;
+            }
+
+            
+         // need to addlogic if there are no search results
+
+            var rec = nlapiCreateRecord('customrecord_wave');
+         //   rec.setFieldValue('custrecord_wave_data', JSON.stringify(JSONobj));
+            rec.setFieldValue('name',  wave_name);
+            rec.setFieldValue('custrecord_wave_increment', wave_increment);            
+           // rec.setFieldValue('custrecord_wave_status', 1);
+            rec.setFieldValue('custrecord_warehouse', checkbox.warehouse);
+            
+            if(checkbox.user != null || checkbox.user != ""){
+            try{
+            rec.setFieldValue('custrecord_assigned_user', checkbox.user);
+            }catch(e){
+            	nlapiLogExecution('error', JSON.stringify(e));
+            }
+            }
+            
+            rec.setFieldValue('custrecord_script_status', 'pending');
+            var wave_rec_id = nlapiSubmitRecord(rec, true);       
+            
+            var context1 = nlapiGetContext();
+            
+      	  
+        	  var JSONobj = {	
+        			  
+      			  wavepicking_item_list: 
+      				  {
+      				   orders: checkbox.orders,
+      				   items: itemJSON,			  
+      				   dropship:checkbox.dropship,
+      				   warehouse:checkbox.warehouse,
+      				   user:checkbox.user	
+      			  }
+      	  };
+            
+            
+      // break up item json and send to suitelet to process      
+          var chuckedData = _.chunk(itemJSON, 40); 
+          
+          for (var i = 0; i < chuckedData.length; i++) {
+                        	 
+        	  //chuckedData[i];   
+        	  var data = JSON.stringify(chuckedData[i]);
+        	  
+        	  nlapiLogExecution('DEBUG', 'entering chuncked data', 'test');
+        	  
+	            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=434&deploy=1&compid=3500213&h=887785dfb750fa6721fa';
+	            url += '&orders=' + encodeURIComponent(checkbox.orders);	
+	            url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+	            url += '&user=' + encodeURIComponent(checkbox.user);	
+	            url += '&itemjson=' + encodeURIComponent(data);
+	            nlapiRequestURL(url); 		           	
+ 
+         	}      
+            
+//            if(checkbox.orders.length < 90){
+//
+//            for ( var x = 0; x < checkbox.orders.length; x++ ) {
+//               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
+//               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
+//             
+//               } 
+//            }
+//            else{
+//              var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=423&deploy=1&compid=3500213&h=e4192eb936927a06d07b';
+//              url += '&orders=' + encodeURIComponent(checkbox.orders);	
+//              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+//              nlapiRequestURL(url);	
+//            	
+//            	
+//            }
+            
+            nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
+//            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=381&deploy=1&compid=3500213&h=380fed4443ca3f7e8b2d';
+//            url += '&orders=' + encodeURIComponent(checkbox.orders);
+//            url += '&warehouse=' + encodeURIComponent(checkbox.warehouse);
+//            url += '&user=' + encodeURIComponent(checkbox.user);
+//            url += '&dropship=' + encodeURIComponent(checkbox.dropship);
+//            nlapiRequestURL(url);
+         
+
+            return 'pending';
+        }
+    };
+
+});
+
+
+
+var OrderReviewAPISuitelet = F3BaseAPISuitelet.extend(function(base){
+
+
+    return {
+        init: function(request, response){
+            this.base = Fiber.proxy(base, this);
+            this.base.init();
+            this.searchId = 'customsearch_reopensalesorders_2_2_2___4';
+            this.main(request, response);
+        },
+
+        submitSelectedRecords: function(checkbox, salesorders){
+            // if all records are empty, then return
+            if (checkbox.orders.length <= 0 &&
+                checkbox.items.length <= 0 &&
+                checkbox.prints.length <= 0 &&
+                salesorders.lengh <= 0) {
+                return;
+            }
+
+            // Governance Unit: 26
+            var checkboxData = {
+                custscript_orde_cancellist: JSON.stringify(checkbox),
+                salesorders: salesorders
+            };
+
+            F3.Util.Utility.logDebug('finalsubmittingdata', JSON.stringify(checkboxData));
+/*
+            var rec = nlapiCreateRecord('customrecord_order_review_schedule');
+            rec.setFieldValue('custrecord_order_review_cancellist', JSON.stringify(checkboxData));
+            rec.setFieldValue('custrecord_order_review_script_status', 'pending');
+            nlapiSubmitRecord(rec, true);
+            var status = nlapiScheduleScript('customscript_orde_review_form_sch', 'customdeploy_orde_review_form_sch');
+*/
+            var status = 'pending';
+            F3.Util.Utility.logDebug('schedule_script_status', status);
+
+
+            return status;
+        }
+    };
+
+    
+
+});
+
+
+/**
+ * This is the main entry point for F3_PPT_ suitelet
+ * NetSuite must only know about this function.
+ * Make sure that the name of this function remains unique across the project.
+ */
+function F3_PPT_API_SuiteletMain(request, response) {
+
+    var type = request.getParameter('type');
+
+    if ( type === 'OrderReview') {
+        return new OrderReviewAPISuitelet(request, response);
+    }
+    else {
+        return new PPTAPISuitelet(request, response);
+    }
+
+
+}

@@ -6,24 +6,25 @@ function createPickRecords(request, response)
 	var waveid = request.getParameter("waveid");
 	var user = request.getParameter("user");
 	var itemjson = request.getParameter("itemjson");
-	
 	var orderFilters = orders.split(",");
 	var items = JSON.parse(itemjson);
 	
-	try{
+	//item JSON is now an object of objects
+	nlapiLogExecution('DEBUG','itemjson', itemjson);
 		
 //	var itemFilters = _.map(items, 'itemId');
-	var itemFilters = items.map( function(obj) { return obj.itemId; } );
-	
-	}catch(e){
-		
-		  nlapiLogExecution('DEBUG','ERROR',  JSON.stringify(e));
-	}
+//	var itemFilters = items.map( function(obj) { return obj.itemId; } );
+  var itemFilters = [];
+		for (var key in items) {
+			
+				itemFilters.push(key);
+			
+		}
 	
 //	var itemFilters = items.map('itemId');
 
  //   nlapiLogExecution('DEBUG','orderFilters',  orderFilters.toString());
- //   nlapiLogExecution('DEBUG','items',  JSON.stringify(itemFilters));
+    nlapiLogExecution('DEBUG','itemFilters',  JSON.stringify(itemFilters));
 	
 //	//search for bin 
 //	// Define search filters
@@ -79,31 +80,39 @@ function createPickRecords(request, response)
 	nlapiLogExecution('DEBUG','item searching' , JSON.stringify(itemSearching));
 	
 	
-	for (var j = 0; j < items.length; j++)	
-	{
-		nlapiLogExecution('DEBUG','items' , JSON.stringify(items[j]) ); 	    
-		   //    var preferredbin = _.find(itemSearching, { 'item': items[j].itemId, 'preferredbin': 'T'});		
-	     var preferredbin = _.find(itemSearching,  function(item){ return item.item === items[j].itemId && item.preferredbin === 'T' &&  parseFloat(item.binonhand) >=  parseFloat(items[j].openQty);});
+	// for (var j = 0; j < items.length; j++)	
+	// {
+	for (var key in items) {
+		if (items.hasOwnProperty(key)) {
+		
+		var binToUse = "";
+		//nlapiLogExecution('DEBUG','items' , JSON.stringify(items[j]) ); 	   
+		nlapiLogExecution('DEBUG','item id' , key );  
+			//var preferredbin = _.find(itemSearching, { 'item': itemId, 'preferredbin': 'T'});		
+			//var preferredbin = _.find(itemSearching, {'item': itemId});	
+	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T' &&  parseFloat(item.binonhand) >=  parseFloat(items[key]);});
 		  // nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
-		       if(preferredbin){		       
-		    		   items[j]['bintouse'] = preferredbin.bin;
+		  
+		       if(preferredbin){	
+
+				binToUse = preferredbin.bin;
 		    		  	    	   	    	   
 		       }else{
 		    	   
-		    	   var primarybin = _.find(itemSearching,  function(item){ return item.item === items[j].itemId && item.preferredbin === 'F' && (item.bintype === 'Primary' || item.bintype === 'Overstock') &&  parseFloat(item.binonhand) >=  parseFloat(items[j].openQty);});
+		    	   var primarybin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'F' && (item.bintype === 'Primary' || item.bintype === 'Overstock') &&  parseFloat(item.binonhand) >=  parseFloat(items[key]);});
 				   if(preferredbin){ 			       
-			    		   items[j]['bintouse'] = primarybin.bin;
+					binToUse = primarybin.bin;
 			    		   	 	   	    	   
 			         } else{
 			        	 
-			        	   var putNobin = _.find(itemSearching,  function(item){ return item.item === items[j].itemId && (item.bintype === 'Primary' || item.bintype === 'Overstock');});
+			        	   var putNobin = _.find(itemSearching,  function(item){ return item.item === key && (item.bintype === 'Primary' || item.bintype === 'Overstock');});
 						    
 						    if(!putNobin){
-						    items[j]['bintouse'] = 34329;
+								binToUse = 34329;
 						    } else {
 						    	
-						    	var preBin2 = _.find(itemSearching,  function(item){ return item.item === items[j].itemId && item.preferredbin === 'T';});
-						    	 items[j]['bintouse'] = preBin2.bin;
+						    	var preBin2 = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
+								binToUse = preBin2.bin;
 						    }
 			        	 
 			        	 
@@ -111,42 +120,56 @@ function createPickRecords(request, response)
 				   
 				 
 		    	   
-		       }
+			   }
+			   
 				       
 			
 		    
 		    try{
-			//create wave pick record	
-			var rec = nlapiCreateRecord('customrecord_pick_task');
-		    rec.setFieldValue('custrecord_pick_task_item', parseFloat(items[j].itemId));
-		    rec.setFieldValue('custrecord_wave_pick_quantity', parseFloat(items[j].openQty));
-		    rec.setFieldValue('custrecord_pick_task_wave', waveid);            
-		    rec.setFieldValue('custrecord_pick_task_bin', items[j].bintouse);
-		    
-		    if(items[j].iskitmember === 'kitmbr'){
-		    	 rec.setFieldValue('custrecord_wave_kit_parent', items[j].parentId);
-		    	 rec.setFieldValue('custrecord_wave_kit_member_factor', items[j].memberQty);
-		    	
-		    }		
-		    
-		    if(user != null || user != ""){
-		    try{
-		    rec.setFieldValue('custrecord_pick_task_user', user);
-		    }catch(e){
-		    	nlapiLogExecution('error', 'error', JSON.stringify(e));
-		    }
-		    }
-		    
-		 
-		    var wavePickTaskid = nlapiSubmitRecord(rec, true);  
-		    }catch(e){
-		    	
-		    	nlapiLogExecution('error', 'error', JSON.stringify(e));
-		    }
-		    
-		    nlapiLogExecution('DEBUG', 'wavePickTaskid', wavePickTaskid);
-		       
-	}  
+
+			
+
+				//create wave pick record	
+				var rec = nlapiCreateRecord('customrecord_pick_task');
+				rec.setFieldValue('custrecord_pick_task_item', key);
+				rec.setFieldValue('custrecord_wave_pick_quantity', parseFloat(items[key]));
+				rec.setFieldValue('custrecord_pick_task_wave', waveid); 
+				 
+				try{
+				rec.setFieldValue('custrecord_pick_task_bin', binToUse);
+				}catch(e){
+					nlapiLogExecution('error', 'setting bin error', JSON.stringify(e));
+
+				}
+				
+				
+				// if(items[j].iskitmember === 'kitmbr'){
+				// 	 rec.setFieldValue('custrecord_wave_kit_parent', items[j].parentId);
+				// 	 rec.setFieldValue('custrecord_wave_kit_member_factor', items[j].memberQty);	
+				// }		
+				
+				if(user != null || user != ""){
+				try{
+				rec.setFieldValue('custrecord_pick_task_user', user);
+				}catch(e){
+					nlapiLogExecution('error', 'error', JSON.stringify(e));
+				}
+				}
+				
+			
+				var wavePickTaskid = nlapiSubmitRecord(rec, true);  
+			
+				}catch(e){
+					
+					nlapiLogExecution('error', 'error', JSON.stringify(e));
+				}
+				
+				nlapiLogExecution('DEBUG', 'wavePickTaskid', wavePickTaskid);
+
+				
+				
+	} 
+} 
 	
 }
 

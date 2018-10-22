@@ -1,4 +1,3 @@
-
 /**
  * Created by zshaikh on 8/26/2015.
  * TODO:
@@ -73,15 +72,8 @@ var F3BaseAPISuitelet = Fiber.extend(function () {
                     result.message = 'success';
                 }
                 else if (action === 'get_dsiusers') {
-                    var dsiUsers = CommonDAL. getDSIUsers();
+                    var dsiUsers = CommonDAL.getDSIUsers();
                     result.data = dsiUsers;
-                    result.status_code = 200;
-                    result.status = 'OK';
-                    result.message = 'success';
-                }
-                else if (action === 'get_orderchannels') {
-                    var ordeChannels = CommonDAL.getOrderChannels();
-                    result.data = ordeChannels;
                     result.status_code = 200;
                     result.status = 'OK';
                     result.message = 'success';
@@ -90,6 +82,13 @@ var F3BaseAPISuitelet = Fiber.extend(function () {
                     //customrecord_producttypes
                     var productTypes = CommonDAL.getProductTypes();
                     result.data = productTypes;
+                    result.status_code = 200;
+                    result.status = 'OK';
+                    result.message = 'success';
+                }
+                else if(action === 'get_order_channels') {
+                    var orderChannels = CommonDAL.getOrderChannels();
+                    result.data = orderChannels;
                     result.status_code = 200;
                     result.status = 'OK';
                     result.message = 'success';
@@ -214,11 +213,11 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
             F3.Util.Utility.logDebug('finalsubmittingdata', JSON.stringify(checkboxData));            
             F3.Util.Utility.logDebug('salesorders', JSON.stringify(checkbox.orders));
-            
-            var search = nlapiLoadSearch('item', 'customsearch5005');
+        
+            var search = nlapiLoadSearch('item', 'customsearch5106');
         	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
         	search.addFilter(newFilter);
-        	
+                	
         	var resultSet = search.runSearch();
         	
         	//nlapiLogExecution('DEBUG','SL testing' , resultSet.length );  	
@@ -226,8 +225,8 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
         	  var isKit = false;
         	  var parentVal = "";
-       // 	  var parentTxt = "";
-       // 	  var parentLine = "";
+        	  var parentTxt = "";
+        	  var parentLine = "";
         	  var parentQty = null;
         	  var excludeMembers = false;
         	  var itemJSON = [];
@@ -235,27 +234,39 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	  
         	  resultSet.forEachResult(function(searchresult)
         	  {
-        	
-        		  
+  
         	       var record = searchresult.getValue('internalid');
                    var itemtype = searchresult.getValue('type');                   
-//                   var rectype = "";       	
-//		               	if(itemtype == "Assembly"){               		
-//		               		rectype = "assemblyitem";               		
-//		               	}else if (itemtype == "Kit" ){               		
-//		               		rectype = "kititem";              		
-//		               	}else if (itemtype == "InvtPart"){               		
-//		               		rectype = "invenotryitem";               		
-//		               	}else{               		
-//		               		rectype = "not found";
-//		               	}          
-        	   //    var itemtxt = searchresult.getValue( 'name');
+                   var rectype = "";       	
+		               	if(itemtype == "Assembly"){               		
+		               		rectype = "assemblyitem";               		
+		               	}else if (itemtype == "Kit" ){               		
+		               		rectype = "kititem";              		
+		               	}else if (itemtype == "InvtPart"){               		
+		               		rectype = "invenotryitem";               		
+		               	}else{               		
+		               		rectype = "not found";
+		               	}          
+        	       var itemtxt = searchresult.getValue( 'name');
         	       var iskitmember = searchresult.getValue( 'formulatext');
-        	   //    var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction');
+        	       
+        	       var itemDesc = searchresult.getValue( 'description').replace(/['"]+/g, '');
+        	       var orderid = searchresult.getValue( 'internalid', 'transaction');
+        	       var orderNum = searchresult.getValue( 'number', 'transaction');
+        	       var customerid = searchresult.getValue( 'name', 'transaction');
+        	       var customertxt = searchresult.getText( 'name', 'transaction');
+        	       var shipAddrtxt = searchresult.getValue( 'shipaddress', 'transaction');
+        	       var line = searchresult.getValue( 'line', 'transaction');
+        	       var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction');
         	       var qty = searchresult.getValue( 'quantity', 'transaction');
-        	    //   var qtyRec = searchresult.getValue( 'quantityshiprecv', 'transaction');
+        	       var qtyRec = searchresult.getValue( 'quantityshiprecv', 'transaction');
         	       var qtyPicked = searchresult.getValue( 'quantitypicked', 'transaction');
-        	  
+        	       var allowSubs = searchresult.getValue( 'custbody_allow_substitutions', 'transaction');
+        	     //  var qtyOpen = qty - qtyRec;
+        	       var upc = searchresult.getValue( 'custcol_upccode', 'transaction' );
+        	       if(!upc){	    	   
+        	    	   upc = searchresult.getValue( 'upccode');
+        	    	   }
         	       
         	       var qtyOpen = (qty - qtyPicked);
         	       if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
@@ -266,12 +277,25 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	    	   excludeMembers = false;	    	   
         	       }
         	      
-        	       var itemObj = {        		  
+        	       var itemObj = {
+        		    	   order:orderid,
+        		    	   orderNum:orderNum,
+        		    	   cusId:customerid,
+        		    	   cusName:customertxt,
+        		    	   shippingAddress:shipAddrtxt,
+        		    	   itemNum:itemtxt,
         		    	   itemId:record,
-        		      	   openQty: qtyOpen,
-        		      	   itemtype: itemtype,
-        		           iskitmember: iskitmember
-        		      	   
+        		    	   itemUpc:upc,
+        		    	   itemDesc:itemDesc,
+        		    	   lineId: line,
+        		    	   openQty: qtyOpen,
+        		    	   qtyCommitted: qtyCom,
+        		    	   itemtype: rectype,
+        		    	   allowsubs: allowSubs,
+        		 //   	   iskitmbr: iskitmember,
+        		//    	   parentId: null,
+        		//    	   parentName: null,
+        		//    	   parentLine: null
         		     };
         	       
         	       if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
@@ -280,10 +304,10 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	    	   parentLine = null;
         	       }
         	       
-        	       if(itemtype == 'Kit'){	// if item is kit set parent up    	 
+        	       if(rectype == 'kititem'){	// if item is kit set parent up    	 
         	    	  parentVal = record;
-        	    	//  parentTxt = itemtxt;
-        	    	//  parentLine = line;
+        	    	  parentTxt = itemtxt;
+        	    	  parentLine = line;
         	    	  parentQty = qty;
         	       }
         	       
@@ -291,55 +315,39 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	    	   
         	    	// want to push parent to kit
         	    	   itemObj['parentId'] = parentVal;
-        	    	//   itemObj['parentName'] = parentTxt;
-        	    	//   itemObj['parentLine'] = parentLine;
+        	    	   itemObj['parentName'] = parentTxt;
+        	    	   itemObj['parentLine'] = parentLine;
         	    	   itemObj['memberQty'] = qty/parentQty;
         	    	   
-        		    }          	       
+        		    }     
         	       
         	       
-        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true){
+        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || !qtyCom){
         	    	   
-        	    //	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
+        	    	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
         	    	   
         	       }else{
         	    	   
-        	    	  // var isInArray = _.find(itemJSON, { 'itemId': record });
-        	    	   var index = _.findIndex(itemJSON, {'itemId': record});
-        	    	   
-        	    	   parseInt(index);
-        	    	   
-        	    	   if(index != -1){ 
-        	    		   
-        	    		//   nlapiLogExecution('DEBUG','index != -1', index);
-        	    		   
-        	    		var newTotal = parseFloat(itemJSON[index].openQty) + parseFloat(qtyOpen);  
-        	    	   
-        	    	//   nlapiLogExecution('DEBUG','Logger: '+ record + ' ::' + qtyOpen , 'old qty: ' + itemJSON[index].openQty + '  new qty: ' + newTotal);
-        	    	   
-        	    	   itemJSON[index].openQty = newTotal;        	    	 
-        	    	  
-        	    	   
-        	    	 //  nlapiLogExecution('DEBUG','new qty' , itemJSON[index].openQty);
-        	    	   
-        	    	   }else{
-        	    		   
-        	    		 //  nlapiLogExecution('DEBUG','index is -1', index);
-        	    		   
-        	    		   itemJSON.push(itemObj); 
-        	    		   
-        	    		 //  nlapiLogExecution('DEBUG','item does not exist', index);
-        	    	   }
-        	    	  
-        	    	   
+        	    	   itemJSON.push(itemObj);
         	       }
         	           
         	     //  nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
         	 	  return true;                // return true to keep iterating
         	 	  
-        	   });          	  
-        	          	
-    
+        	   });          
+        	
+        	  
+          	  var JSONobj = {	
+          			  
+        			  wavepicking_item_list: 
+        				  {
+        				   orders: checkbox.orders,
+        				   items: itemJSON,			  
+        				   dropship:checkbox.dropship,
+        				   warehouse:checkbox.warehouse,
+        				   user:checkbox.user	
+        			  }
+        	  };
            
 //        	  nlapiLogExecution('DEBUG','json data' , JSON.stringify(JSONobj) ); 
             
@@ -375,7 +383,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
          // need to addlogic if there are no search results
 
             var rec = nlapiCreateRecord('customrecord_wave');
-         //   rec.setFieldValue('custrecord_wave_data', JSON.stringify(JSONobj));
+            rec.setFieldValue('custrecord_wave_data', JSON.stringify(JSONobj));
             rec.setFieldValue('name',  wave_name);
             rec.setFieldValue('custrecord_wave_increment', wave_increment);            
            // rec.setFieldValue('custrecord_wave_status', 1);
@@ -390,59 +398,59 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             }
             
             rec.setFieldValue('custrecord_script_status', 'pending');
-            var wave_rec_id = nlapiSubmitRecord(rec, true);       
+            var wave_rec_id = nlapiSubmitRecord(rec, true);
+       
             
             var context1 = nlapiGetContext();
             
-      	  
-        	  var JSONobj = {	
-        			  
-      			  wavepicking_item_list: 
-      				  {
-      				   orders: checkbox.orders,
-      				   items: itemJSON,			  
-      				   dropship:checkbox.dropship,
-      				   warehouse:checkbox.warehouse,
-      				   user:checkbox.user	
-      			  }
-      	  };
-            
-            
-      // break up item json and send to suitelet to process      
-          var chuckedData = _.chunk(itemJSON, 40); 
+        //    if(checkbox.orders.length < 90){
+
+            for ( var x = 0; x < checkbox.orders.length; x++ ) {
+               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
+               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
+             
+               } 
+      //      }
+            // else{
+            //   var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
+            //   url += '&orders=' + encodeURIComponent(checkbox.orders);	
+            //   url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+            //   nlapiRequestURL(url);	
+            	
+            	
+            // }
+
+            //sum items before submitting to pick task suitlet
+
+            try{
+            var pickItems = itemJSON.reduce(function (c, v) {
+                c[v.itemId] = (c[v.itemId] || 0) + parseInt(v.qtyCommitted);
+                return c;
+              }, {});
+            }catch(e){
+
+                nlapiLogExecution('DEBUG', 'error on reduce', JSON.stringify(e));
+            }
+
+              nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
+
+           // var chuckedData = _.chunk(pickItems, 40); 
           
-          for (var i = 0; i < chuckedData.length; i++) {
-                        	 
-        	  //chuckedData[i];   
-        	  var data = JSON.stringify(chuckedData[i]);
-        	  
-        	  nlapiLogExecution('DEBUG', 'entering chuncked data', 'test');
-        	  
-	            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=434&deploy=1&compid=3500213&h=887785dfb750fa6721fa';
-	            url += '&orders=' + encodeURIComponent(checkbox.orders);	
-	            url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-	            url += '&user=' + encodeURIComponent(checkbox.user);	
-	            url += '&itemjson=' + encodeURIComponent(data);
-	            nlapiRequestURL(url); 		           	
- 
-         	}      
-            
-//            if(checkbox.orders.length < 90){
-//
-//            for ( var x = 0; x < checkbox.orders.length; x++ ) {
-//               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
-//               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
-//             
-//               } 
-//            }
-//            else{
-//              var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=423&deploy=1&compid=3500213&h=e4192eb936927a06d07b';
-//              url += '&orders=' + encodeURIComponent(checkbox.orders);	
-//              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-//              nlapiRequestURL(url);	
-//            	
-//            	
-//            }
+        //    for (var i = 0; i < chuckedData.length; i++) {
+                            
+                //chuckedData[i];   
+              //  var data = JSON.stringify(chuckedData[i]);
+
+              //  nlapiLogExecution('DEBUG', 'chuckedData[i]', JSON.stringify(chuckedData[i]));
+               
+                var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=434&deploy=1&compid=3500213&h=887785dfb750fa6721fa';
+                url += '&orders=' + encodeURIComponent(checkbox.orders);	
+                url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+                url += '&user=' + encodeURIComponent(checkbox.user);	
+                url += '&itemjson=' + encodeURIComponent(JSON.stringify(pickItems));
+                nlapiRequestURL(url); 		           	
+
+         //   }  
             
             nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
 //            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=381&deploy=1&compid=3500213&h=380fed4443ca3f7e8b2d';
@@ -451,6 +459,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 //            url += '&user=' + encodeURIComponent(checkbox.user);
 //            url += '&dropship=' + encodeURIComponent(checkbox.dropship);
 //            nlapiRequestURL(url);
+         
          
 
             return 'pending';

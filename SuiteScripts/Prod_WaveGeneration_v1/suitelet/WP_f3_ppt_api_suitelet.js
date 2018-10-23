@@ -216,7 +216,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             
         
             
-            var search = nlapiLoadSearch('item', 'customsearch5126');
+            var search = nlapiLoadSearch('item', 'customsearch5106');
         	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
         	search.addFilter(newFilter);
                 	
@@ -406,7 +406,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             
             var context1 = nlapiGetContext();
             
-            if(checkbox.orders.length < 90){
+            if(checkbox.orders.length < 80){
 
             for ( var x = 0; x < checkbox.orders.length; x++ ) {
                nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
@@ -422,15 +422,60 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             	
             	
             }
-            
+
+            var pickItems = _.pullAllBy(itemJSON, [{ 'qtyCommitted': "" }, { 'qtyCommitted': 0 }, { 'qtyCommitted': null }], 'qtyCommitted');
+            nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
+            //sum all items     
+             pickItems = pickItems.reduce(function (c, v) {
+                c[v.itemId] = (c[v.itemId] || 0) + parseInt(v.qtyCommitted);
+                return c;
+              }, {});
+
+            //  //remove items with 0 or null committed quantities 
+            //   Object.keys(pickItems).forEach(function (key) {
+            //     return pickItems[key] == null || pickItems[key] == 0 && delete pickItems[key];
+            //   });
+
+             // nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
+              //chunck object and send it in pieces of 30
+                 //   var values = Object.values(pickItems);
+                    var values = Object.keys(pickItems).map(function(key) {
+                        return pickItems[key];
+                    });
+                    var final = [];
+                    var counter = 0;
+                    var portion = {};
+
+                    for (var key in pickItems) {
+                    if (counter !== 0 && counter % 30 === 0) {
+                        final.push(portion);
+                        portion = {};
+                    }
+                    portion[key] = values[counter];
+                    counter++
+                    }
+                    final.push(portion);
+
+                    nlapiLogExecution('DEBUG', 'final', JSON.stringify(final));
+
+
+            for (var i = 0; i < final.length; i++) {
+                                          
+               var data = JSON.stringify(final[i]);
+
+               nlapiLogExecution('DEBUG', 'final[i]', JSON.stringify(final[i]));
+               
+              var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=434&deploy=1&compid=3500213&h=887785dfb750fa6721fa';
+              url += '&orders=' + encodeURIComponent(checkbox.orders);	
+              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+              url += '&user=' + encodeURIComponent(checkbox.user);	
+              url += '&itemjson=' + encodeURIComponent(data);
+              nlapiRequestURL(url); 		           	
+
+          }  
+
+
             nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
-//            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=381&deploy=1&compid=3500213&h=380fed4443ca3f7e8b2d';
-//            url += '&orders=' + encodeURIComponent(checkbox.orders);
-//            url += '&warehouse=' + encodeURIComponent(checkbox.warehouse);
-//            url += '&user=' + encodeURIComponent(checkbox.user);
-//            url += '&dropship=' + encodeURIComponent(checkbox.dropship);
-//            nlapiRequestURL(url);
-         
          
 
             return 'pending';

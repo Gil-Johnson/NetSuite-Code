@@ -90,8 +90,10 @@ function createPickRecords(request, response)
 		nlapiLogExecution('DEBUG','item id' , key );  
 			//var preferredbin = _.find(itemSearching, { 'item': itemId, 'preferredbin': 'T'});		
 			//var preferredbin = _.find(itemSearching, {'item': itemId});	
+		try{
+
 	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T' &&  parseFloat(item.binonhand) >=  parseFloat(items[key])});
-		  // nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
+		   nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
 		  
 		       if(preferredbin){	
 
@@ -101,7 +103,8 @@ function createPickRecords(request, response)
 		    	   
 				   var primarybin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'F' && (item.bintype === 'Primary' || item.bintype === 'Overstock')});
 				   
-				   if(preferredbin){ 			       
+				   if(primarybin){ 
+
 					binToUse = primarybin.bin;
 			    		   	 	   	    	   
 			         } else{
@@ -117,11 +120,12 @@ function createPickRecords(request, response)
 						    }
 			        	 
 			        	 
-			         }
-				   
-				 
-		    	   
+			         }   
 			   }
+			}catch(e){
+
+				nlapiLogExecution('error', 'error searching for bin', JSON.stringify(e));
+			}
 			   
 			   nlapiLogExecution('DEBUG', 'item bin values', "item: " + key + "  bin: " + binToUse);      
 			
@@ -139,6 +143,7 @@ function createPickRecords(request, response)
 				try{
 				rec.setFieldValue('custrecord_pick_task_bin', binToUse);
 				}catch(e){
+					rec.setFieldValue('custrecord_pick_task_bin', null);
 					nlapiLogExecution('error', 'setting bin error', JSON.stringify(e));
 
 				}

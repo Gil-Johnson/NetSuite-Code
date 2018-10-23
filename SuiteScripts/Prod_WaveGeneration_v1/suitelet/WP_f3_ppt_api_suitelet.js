@@ -213,8 +213,10 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
             F3.Util.Utility.logDebug('finalsubmittingdata', JSON.stringify(checkboxData));            
             F3.Util.Utility.logDebug('salesorders', JSON.stringify(checkbox.orders));
+            
         
-            var search = nlapiLoadSearch('item', 'customsearch5106');
+            
+            var search = nlapiLoadSearch('item', 'customsearch5126');
         	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
         	search.addFilter(newFilter);
                 	
@@ -234,7 +236,8 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	  
         	  resultSet.forEachResult(function(searchresult)
         	  {
-  
+        	
+        		  
         	       var record = searchresult.getValue('internalid');
                    var itemtype = searchresult.getValue('type');                   
                    var rectype = "";       	
@@ -322,7 +325,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         		    }     
         	       
         	       
-        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || !qtyCom){
+        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true){
         	    	   
         	    	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
         	    	   
@@ -403,58 +406,22 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             
             var context1 = nlapiGetContext();
             
-        //    if(checkbox.orders.length < 90){
+            if(checkbox.orders.length < 90){
 
             for ( var x = 0; x < checkbox.orders.length; x++ ) {
                nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
                nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
              
                } 
-      //      }
-            // else{
-            //   var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
-            //   url += '&orders=' + encodeURIComponent(checkbox.orders);	
-            //   url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-            //   nlapiRequestURL(url);	
-            	
-            	
-            // }
-
-            //sum items before submitting to pick task suitlet
-
-            try{
-            var pickItems = itemJSON.reduce(function (c, v) {
-                c[v.itemId] = (c[v.itemId] || 0) + parseInt(v.qtyCommitted);
-                return c;
-              }, {});
-            }catch(e){
-
-                nlapiLogExecution('DEBUG', 'error on reduce', JSON.stringify(e));
             }
-            
-            Object.keys(pickItems).forEach(function (key) {
-                return pickItems[key] == null && delete pickItems[key];
-              });
-
-              nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
-
-           // var chuckedData = _.chunk(pickItems, 40); 
-          
-        //    for (var i = 0; i < chuckedData.length; i++) {
-                            
-                //chuckedData[i];   
-              //  var data = JSON.stringify(chuckedData[i]);
-
-              //  nlapiLogExecution('DEBUG', 'chuckedData[i]', JSON.stringify(chuckedData[i]));
-               
-                var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=434&deploy=1&compid=3500213&h=887785dfb750fa6721fa';
-                url += '&orders=' + encodeURIComponent(checkbox.orders);	
-                url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-                url += '&user=' + encodeURIComponent(checkbox.user);	
-                url += '&itemjson=' + encodeURIComponent(JSON.stringify(pickItems));
-                nlapiRequestURL(url); 		           	
-
-         //   }  
+            else{
+              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
+              url += '&orders=' + encodeURIComponent(checkbox.orders);	
+              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+              nlapiRequestURL(url);	
+            	
+            	
+            }
             
             nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
 //            var url = 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=381&deploy=1&compid=3500213&h=380fed4443ca3f7e8b2d';

@@ -3,9 +3,9 @@
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
  */
-define(['N/record',  'N/search'],
+define(['N/record',  'N/search', 'N/email', 'N/runtime', '/SuiteScripts - Globals/lodash'],
 
-function(record, search) {
+function(record, search, email, runtime, lodash) {
    
     /**
      * Definition of the Suitelet script trigger point.
@@ -26,11 +26,12 @@ function(record, search) {
 	    	//retrive parameters 
 			 var waveid = context.request.parameters.waveid; 
 			 var itemsToFullArray = []; 
+			 var ordersToFullfillArray = [];
 
 			 log.debug('waveid', waveid);	
 			 
 			 //run search for all orders with a certain wave 
-			 var itemsToFulfill = search.load({
+			var itemsToFulfill = search.load({
 				id: 'customsearch_fulfill_wave_orders',
 			});
 
@@ -60,96 +61,139 @@ function(record, search) {
 		   });
 
 
-			log.error('itemsToFullArray', JSON.stringify(itemsToFullArray));
+			log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
 
 
 			//run search to pull all orders with wave
+			var ordersToFullfill = search.load({
+				id: 'customsearch5111',
+			});
+
+			ordersToFullfill.filters.push( search.createFilter({
+				join: 'transaction',
+				name: 'custbody_current_wave',
+				operator: search.Operator.IS,
+				values: waveid
+			})); 
+
+
+			ordersToFullfill.run().each(function(result) {
+	    	   	 
+				var id = result.id;
+
+				var orderid = result.getValue({
+					join: 'transaction',
+					name: 'internalid'
+				});
+
+				var qtyCommitted = result.getValue({
+					join: 'transaction',
+					name: 'quantitycommitted'
+				});
+		
+				ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :qtyCommitted});
+				
+				return true;
 			
+		   });
+
+		   log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
+
+			//consolidate item fulfillments based on sales order
+			var grouped = _.groupBy(ordersToFullfillArray, function(IF) {
+			return IF.orderid;
+			});
+	
+			log.debug('grouped array', JSON.stringify(grouped));
+
+			//loop though grouped array and create fulfillments
+			Object.keys(grouped).forEach(function(key, index) {
+		   		
+				var fulfillmentRecord = record.transform({
+					   fromType: record.Type.SALES_ORDER,
+					   fromId: parseInt(key),
+					   toType: record.Type.ITEM_FULFILLMENT,
+					   isDynamic: false,
+				   });
+				 
+				 fulfillmentRecord.setValue({
+					   fieldId: 'shipstatus',
+					   value: 'A',
+					   ignoreFieldChange: true
+				   });
+				 
+				 var numLines = fulfillmentRecord.getLineCount({
+					   sublistId: 'item'
+				   });	 
+				 
+				 for (var i = 0; i <= numLines-1; i++) {
+					 
+					   fulfillmentRecord.setSublistValue({
+						   sublistId: 'item',
+						   fieldId: 'itemreceive',
+						   line: i,
+						   value: false
+					   });	
+					 
+				 }
+				 
+				 
+							   
+				  log.debug('key', key);
+			  //	log.debug('index', index);		   		
+				  
+				  _.forEach(grouped[key], function(arrayItem) {
+					  
+					  log.debug('item', arrayItem.item); 
+					  log.debug('bin', arrayItem.bin); 
+					  log.debug('qty', Math.abs(arrayItem.qty)); 
+						  
+												 
+						  var lineNumber = fulfillmentRecord.findSublistLineWithValue({
+							sublistId: 'item',
+							fieldId: 'item',
+							value: arrayItem.item
+						 }); 
+						  
+						  log.debug('line num', lineNumber);
+						  
+						  fulfillmentRecord.setSublistValue({
+						   sublistId: 'item',
+						   fieldId: 'itemreceive',
+						   line: parseInt(lineNumber),
+						   value: true
+					   });	
+						
+							fulfillmentRecord.setSublistValue({
+						   sublistId: 'item',
+						   fieldId: 'quantity',
+						   line: parseInt(lineNumber),
+						   value: Math.abs(arrayItem.qty)
+					   }); 
+					   
+						  fulfillmentRecord.setSublistValue({
+						   sublistId: 'item',
+						   fieldId: 'binnumbers',
+						   line: parseInt(lineNumber),
+						   value: arrayItem.binString
+					   });   				    
+					   
+				  });
+				  try{	
+					var fulfillmentid = fulfillmentRecord.save();
+				  }catch(e){
+					  
+					  log.debug(JSON.stringify(e));
+				  }
+					log.debug('fulfillmentid', fulfillmentid);
+				  
+				  
+				  
+			  });
+
+
 			return;
-	    	 
-	    	 log.debug('orders', orders);		 
-	    	 
-	    	 var ordersToFulfill = JSON.parse(orders);
-	    		    	 
-	    	 ordersToFulfill.forEach(function (order){  	    			    
-	        
-	    	 
-	    	     var fulfillmentRecord = record.transform({
-					    fromType: record.Type.SALES_ORDER,
-					    fromId: order.orderid,
-					    toType: record.Type.ITEM_FULFILLMENT,
-					    isDynamic: false,
-					});
-				  
-				  fulfillmentRecord.setValue({
-					    fieldId: 'shipstatus',
-					    value: 'A',
-					    ignoreFieldChange: true
-					});
-				  
-				  
-				  var numLines = fulfillmentRecord.getLineCount({
-					    sublistId: 'item'
-					});	  
-				  
-				  
-				 	for (var i = 0; i <= numLines-1; i++) {	 	            	
-	            	    
-	            		  //loop though line items and uncheck items to fulfill		        			
-	        			var itemValue = fulfillmentRecord.getSublistValue({
-	        			    sublistId: 'item',
-	        			    fieldId: 'item',
-	        			    line: i
-	        			});
-	        			
-	        			        			 
-	        			if(parseInt(itemValue) == parseInt(order.item)){	
-	        			
-	        				log.debug("order item compare", order.item + "  / compare to " + itemValue);
-                          	
-                          	fulfillmentRecord.setSublistValue({
-  		        			    sublistId: 'item',
-  		        			    fieldId: 'quantity',
-  		        			    line: i,
-  		        			    value: parseInt(order.qtyAvl)
-  		        			}); 
-                          	
-                             	fulfillmentRecord.setSublistValue({
-  		        			    sublistId: 'item',
-  		        			    fieldId: 'binnumbers',
-  		        			    line: i,
-  		        			    value: order.bin
-  		        			});
-                          	
-	        			} else {	
-	        				
-	        				log.debug('item dont macth',  order.item + "  / compare to " + itemValue);
-		        			
-		        			fulfillmentRecord.setSublistValue({
-		        			    sublistId: 'item',
-		        			    fieldId: 'itemreceive',
-		        			    line: i,
-		        			    value: false
-		        			});	      			
-		        			
-		        				        			
-		        			}       			
-	        				        			
- 			
- 			 } // end looping though items on fulfillments  
-				 	
-					try{
-       				  var fulfillmentid = fulfillmentRecord.save();
-       				  }catch(e){
-       					  
-       					  log.error('error on save of fulfillment', JSON.stringify(e));
-       				  }
-       				  
-       				  log.debug('fulfillmentid', fulfillmentid);
-				  
-				  
-	    	 
-	    	  });    	
+	    	    	
     	 	 
 	    	
 	    	

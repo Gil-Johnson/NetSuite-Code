@@ -27,6 +27,7 @@ function(record, search, email, runtime, lodash) {
 			 var waveid = context.request.parameters.waveid; 
 			 var itemsToFullArray = []; 
 			 var ordersToFullfillArray = [];
+			 var index = 0;
 
 			 log.debug('waveid', waveid);	
 			 
@@ -54,7 +55,8 @@ function(record, search, email, runtime, lodash) {
 					name: 'binonhandavail'
 				});
 		
-				itemsToFullArray.push({item: id, binnumber: binnumber,binonhandavail:binonhandavail});
+				itemsToFullArray.push({item: id, binnumber: binnumber,binonhandavail:binonhandavail , index:index});
+				index++;
 				
 				return true;
 			
@@ -90,8 +92,16 @@ function(record, search, email, runtime, lodash) {
 					join: 'transaction',
 					name: 'quantitycommitted'
 				});
-		
-				ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :qtyCommitted});
+
+				var bintouse = _.find(itemsToFullArray, function(o) { return o.binonhandavail > Math.abs(qtyCommitted); });
+
+				if(bintouse){
+					itemsToFullArray[bintouse.index].binonhandavail = Math.abs(itemsToFullArray[bintouse.index].binonhandavail) - Math.abs(qtyCommitted);
+					
+					var binString =  bintouse.binnumber + '(' + Math.abs(qtyCommitted) + ')' ;
+			
+					ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :qtyCommitted, binString:binString});
+				}
 				
 				return true;
 			
@@ -99,12 +109,17 @@ function(record, search, email, runtime, lodash) {
 
 		   log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
 
+		  
+
 			//consolidate item fulfillments based on sales order
 			var grouped = _.groupBy(ordersToFullfillArray, function(IF) {
 			return IF.orderid;
 			});
 	
 			log.debug('grouped array', JSON.stringify(grouped));
+
+			log.debug('itemsToFullArray after remove qty', JSON.stringify(itemsToFullArray));
+
 
 			//loop though grouped array and create fulfillments
 			Object.keys(grouped).forEach(function(key, index) {
@@ -145,8 +160,8 @@ function(record, search, email, runtime, lodash) {
 				  _.forEach(grouped[key], function(arrayItem) {
 					  
 					  log.debug('item', arrayItem.item); 
-					  log.debug('bin', arrayItem.bin); 
-					  log.debug('qty', Math.abs(arrayItem.qty)); 
+					  log.debug('bin', arrayItem.binString); 
+					  log.debug('qty', Math.abs(arrayItem.qtyCommitted)); 
 						  
 												 
 						  var lineNumber = fulfillmentRecord.findSublistLineWithValue({
@@ -157,21 +172,21 @@ function(record, search, email, runtime, lodash) {
 						  
 						  log.debug('line num', lineNumber);
 						  
-						  fulfillmentRecord.setSublistValue({
+						fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
 						   fieldId: 'itemreceive',
 						   line: parseInt(lineNumber),
 						   value: true
 					   });	
 						
-							fulfillmentRecord.setSublistValue({
+						fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
 						   fieldId: 'quantity',
 						   line: parseInt(lineNumber),
-						   value: Math.abs(arrayItem.qty)
+						   value: Math.abs(arrayItem.qtyCommitted)
 					   }); 
 					   
-						  fulfillmentRecord.setSublistValue({
+						fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
 						   fieldId: 'binnumbers',
 						   line: parseInt(lineNumber),
@@ -186,17 +201,9 @@ function(record, search, email, runtime, lodash) {
 					  log.debug(JSON.stringify(e));
 				  }
 					log.debug('fulfillmentid', fulfillmentid);
-				  
-				  
-				  
+
 			  });
-
-
-			return;
-	    	    	
-    	 	 
-	    	
-	    	
+	
 		 }catch(e){
 			 
 			 var error = log.error("error", JSON.stringify(e));

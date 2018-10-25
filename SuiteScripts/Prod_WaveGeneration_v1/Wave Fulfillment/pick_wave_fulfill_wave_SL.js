@@ -93,14 +93,25 @@ function(record, search, email, runtime, lodash) {
 					name: 'quantitycommitted'
 				});
 
-				var bintouse = _.find(itemsToFullArray, function(o) { return o.binonhandavail > Math.abs(qtyCommitted); });
+				var qtyPicked = result.getValue({
+					join: 'transaction',
+					name: 'quantitypicked'
+				});
+
+				if(!qtyPicked){
+					qtyPicked = 0;
+				}
+
+				var newQty = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
+
+				var bintouse = _.find(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail > Math.abs(newQty); });
 
 				if(bintouse){
-					itemsToFullArray[bintouse.index].binonhandavail = Math.abs(itemsToFullArray[bintouse.index].binonhandavail) - Math.abs(qtyCommitted);
+					itemsToFullArray[bintouse.index].binonhandavail = Math.abs(itemsToFullArray[bintouse.index].binonhandavail) - Math.abs(newQty);
 					
-					var binString =  bintouse.binnumber + '(' + Math.abs(qtyCommitted) + ')' ;
+					var binString =  bintouse.binnumber + '(' + Math.abs(newQty) + ')' ;
 			
-					ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :qtyCommitted, binString:binString});
+					ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :newQty, binString:binString});
 				}
 				
 				return true;
@@ -198,7 +209,7 @@ function(record, search, email, runtime, lodash) {
 					var fulfillmentid = fulfillmentRecord.save();
 				  }catch(e){
 					  
-					  log.debug(JSON.stringify(e));
+					  log.debug('error saving fulfillment', JSON.stringify(e));
 				  }
 					log.debug('fulfillmentid', fulfillmentid);
 

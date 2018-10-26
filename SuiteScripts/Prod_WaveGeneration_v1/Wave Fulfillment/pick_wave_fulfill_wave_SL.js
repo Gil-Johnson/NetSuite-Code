@@ -20,17 +20,24 @@ function(record, search, email, runtime, lodash) {
 	 if (context.request.method === 'GET'){	
 		 
 		//put error handling for no values===============================
-		 
+
 		 try{
 	    	
 	    	//retrive parameters 
 			 var waveid = context.request.parameters.waveid; 
+			 var orderid = context.request.parameters.id; 
 			 var itemsToFullArray = []; 
 			 var ordersToFullfillArray = [];
 			 var index = 0;
 
 			 log.debug('waveid', waveid);	
-			 
+			 log.debug('orderid ', orderid);
+
+			 if(!waveid && !orderid){
+				 context.response.write('error please contact your NetSuite admin');
+				 return;
+			 }
+
 			 //run search for all orders with a certain wave 
 			var itemsToFulfill = search.load({
 				id: 'customsearch_fulfill_wave_orders',
@@ -78,10 +85,21 @@ function(record, search, email, runtime, lodash) {
 				values: waveid
 			})); 
 
+			if(orderid){
+				log.debug('orderid filter', orderid);
+				ordersToFullfill.filters.push( search.createFilter({
+					join: 'transaction',
+					name: 'internalid',
+					operator: search.Operator.IS,
+					values: orderid
+				})); 
+		     }
+
 
 			ordersToFullfill.run().each(function(result) {
 	    	   	 
 				var id = result.id;
+				log.debug('item id', id)
 
 				var orderid = result.getValue({
 					join: 'transaction',
@@ -104,12 +122,17 @@ function(record, search, email, runtime, lodash) {
 
 				var newQty = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
 
-				var bintouse = _.find(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail > Math.abs(newQty); });
+				var bintouse = _.find(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail >= Math.abs(newQty); });
+
+				log.debug('bintouse', bintouse);
 
 				if(bintouse){
+
 					itemsToFullArray[bintouse.index].binonhandavail = Math.abs(itemsToFullArray[bintouse.index].binonhandavail) - Math.abs(newQty);
 					
 					var binString =  bintouse.binnumber + '(' + Math.abs(newQty) + ')' ;
+
+					log.debug('binString ', binString );
 			
 					ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :newQty, binString:binString});
 				}
@@ -222,7 +245,7 @@ function(record, search, email, runtime, lodash) {
 		 }
 	 		         
 	                  
-	       context.response.write('test');
+	       context.response.write('<script> window.history.back() </script>');
 	    		 
 		 	 		
 		 }else{

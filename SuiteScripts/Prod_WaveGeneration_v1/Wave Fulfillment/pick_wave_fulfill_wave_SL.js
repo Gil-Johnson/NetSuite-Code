@@ -78,32 +78,48 @@ function(record, search, email, runtime, lodash) {
 				id: 'customsearch5111',
 			});
 
-			ordersToFullfill.filters.push( search.createFilter({
-				join: 'transaction',
-				name: 'custbody_current_wave',
-				operator: search.Operator.IS,
-				values: waveid
-			})); 
-
-			if(orderid){
-				log.debug('orderid filter', orderid);
 				ordersToFullfill.filters.push( search.createFilter({
 					join: 'transaction',
-					name: 'internalid',
+					name: 'custbody_current_wave',
 					operator: search.Operator.IS,
-					values: orderid
+					values: waveid
 				})); 
-		     }
+
+				if(orderid){
+					log.debug('orderid filter', orderid);
+					ordersToFullfill.filters.push( search.createFilter({
+						join: 'transaction',
+						name: 'internalid',
+						operator: search.Operator.IS,
+						values: orderid
+					})); 
+				}
+
+		//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
+			var isKit = false;
+			var parentVal = "";
+			var parentTxt = "";
+			var parentLine = "";
+			var parentQty = null;
+			var excludeMembers = false;
 
 
 			ordersToFullfill.run().each(function(result) {
 	    	   	 
 				var id = result.id;
-				log.debug('item id', id)
+				
+				var itemType = result.getValue({
+					name: 'type'
+				});
 
 				var orderid = result.getValue({
 					join: 'transaction',
 					name: 'internalid'
+				});
+
+				var qty = result.getValue({
+					join: 'transaction',
+					name: 'quantity'
 				});
 
 				var qtyCommitted = result.getValue({
@@ -116,10 +132,23 @@ function(record, search, email, runtime, lodash) {
 					name: 'quantitypicked'
 				});
 
+				var iskitmember = result.getValue({
+					name: 'formulatext'
+				});
+
+				var qtyOpen = (qtyCommitted - qtyPicked);
+				if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
+					excludeMembers = true;	    	   
+				}
+
+				if(qtyOpen > 0 && iskitmember != 'kitmbr'){
+					excludeMembers = false;	    	   
+				}
+
 				if(!qtyPicked){
 					qtyPicked = 0;
 				}
-
+				
 				var newQty = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
 
 				var bintouse = _.find(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail >= Math.abs(newQty); });
@@ -134,16 +163,46 @@ function(record, search, email, runtime, lodash) {
 
 					log.debug('binString ', binString );
 			
-					ordersToFullfillArray.push({item: id, orderid: orderid, qtyCommitted :newQty, binString:binString});
+					var itemObj = {item: id, orderid: orderid, qtyCommitted :newQty, binString:binString, parentId: "", memberQty: 0};
+
+				}
+
+
+				if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
+					parentVal =  null;
+					parentTxt = null;
+					parentLine = null;
 				}
 				
+				if(itemType == 'Kit'){	// if item is kit set parent up    	 
+				   parentVal = id;
+				   parentQty = qty;
+				}
+				
+				if(iskitmember == 'kitmbr' && parentVal != null){ 		    	  
+					
+				 // want to push parent to kit
+					itemObj['parentId'] = parentVal;
+					itemObj['memberQty'] = qty/parentQty;
+					
+				 }     
+				
+				
+				if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemType == "Kit"){
+					
+					log.debug('debug', 'dont add assembly members');
+					
+				}else{
+
+					ordersToFullfillArray.push(itemObj);
+
+				}
+
 				return true;
 			
 		   });
 
 		   log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
-
-		  
 
 			//consolidate item fulfillments based on sales order
 			var grouped = _.groupBy(ordersToFullfillArray, function(IF) {
@@ -154,10 +213,17 @@ function(record, search, email, runtime, lodash) {
 
 			log.debug('itemsToFullArray after remove qty', JSON.stringify(itemsToFullArray));
 
+			// need to determine how many kits we can fulfill
 
 			//loop though grouped array and create fulfillments
 			Object.keys(grouped).forEach(function(key, index) {
-		   		
+
+				var kitIds = grouped[key].map(function (item) {
+					return item.parentId;
+				  });
+	
+				log.debug('kitIds', JSON.stringify(kitIds));
+		
 				var fulfillmentRecord = record.transform({
 					   fromType: record.Type.SALES_ORDER,
 					   fromId: parseInt(key),
@@ -176,6 +242,8 @@ function(record, search, email, runtime, lodash) {
 				   });	 
 				 
 				 for (var i = 0; i <= numLines-1; i++) {
+
+					//pull all kit parents and skip
 					 
 					   fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
@@ -185,11 +253,29 @@ function(record, search, email, runtime, lodash) {
 					   });	
 					 
 				 }
-				 
-				 
-							   
+				 		   
 				  log.debug('key', key);
-			  //	log.debug('index', index);		   		
+			  //	log.debug('index', index);	
+			  
+			   //recieve kits
+			   if(kitIds){
+					for (var i in kitIds) {
+						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
+							sublistId: 'item',
+							fieldId: 'item',
+							value: kitIds[i]
+						 }); 
+
+						 fulfillmentRecord.setSublistValue({
+							sublistId: 'item',
+							fieldId: 'itemreceive',
+							line: parseInt(lineNumber),
+							value: true
+						});
+
+					}
+		     	}
+
 				  
 				  _.forEach(grouped[key], function(arrayItem) {
 					  
@@ -198,7 +284,7 @@ function(record, search, email, runtime, lodash) {
 					  log.debug('qty', Math.abs(arrayItem.qtyCommitted)); 
 						  
 												 
-						  var lineNumber = fulfillmentRecord.findSublistLineWithValue({
+						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
 							fieldId: 'item',
 							value: arrayItem.item

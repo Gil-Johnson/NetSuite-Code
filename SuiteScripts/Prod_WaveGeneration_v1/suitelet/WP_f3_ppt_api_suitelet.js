@@ -243,7 +243,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
                    var rectype = "";       	
 		               	if(itemtype == "Assembly"){               		
 		               		rectype = "assemblyitem";               		
-		               	}else if (itemtype == "Kit" ){               		
+		               	}else if (itemtype == "Kit" ){             		
 		               		rectype = "kititem";              		
 		               	}else if (itemtype == "InvtPart"){               		
 		               		rectype = "invenotryitem";               		
@@ -271,7 +271,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	    	   upc = searchresult.getValue( 'upccode');
         	    	   }
         	       
-        	       var qtyOpen = (qty - qtyPicked);
+        	       var qtyOpen = (qtyCom - qtyPicked);
         	       if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
         	    	   excludeMembers = true;	    	   
         	       }
@@ -295,7 +295,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         		    	   qtyCommitted: qtyCom,
         		    	   itemtype: rectype,
         		    	   allowsubs: allowSubs,
-        		 //   	   iskitmbr: iskitmember,
+        		    	   iskitmbr: iskitmember,
         		//    	   parentId: null,
         		//    	   parentName: null,
         		//    	   parentLine: null
@@ -325,7 +325,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         		    }     
         	       
         	       
-        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true){
+        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemtype == "Kit"){
         	    	   
         	    	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
         	    	   

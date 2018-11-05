@@ -30,8 +30,8 @@ function(record, search, email, runtime, lodash) {
 			 var ordersToFullfillArray = [];
 			 var index = 0;
 
-			 log.debug('waveid', waveid);	
-			 log.debug('orderid ', orderid);
+			// log.debug('waveid', waveid);	
+			// log.debug('orderid ', orderid);
 
 			 if(!waveid && !orderid){
 				 context.response.write('error please contact your NetSuite admin');
@@ -70,7 +70,7 @@ function(record, search, email, runtime, lodash) {
 		   });
 
 
-			log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
+			//log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
 
 
 			//run search to pull all orders with wave
@@ -86,7 +86,7 @@ function(record, search, email, runtime, lodash) {
 				})); 
 
 				if(orderid){
-					log.debug('orderid filter', orderid);
+					//log.debug('orderid filter', orderid);
 					ordersToFullfill.filters.push( search.createFilter({
 						join: 'transaction',
 						name: 'internalid',
@@ -149,25 +149,22 @@ function(record, search, email, runtime, lodash) {
 					qtyPicked = 0;
 				}
 				
-				var newQty = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
+				var qtyNeeded = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
 
-				var bintouse = _.find(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail >= Math.abs(newQty); });
+				var itemData = checkBins(itemsToFullArray, id, qtyNeeded);
 
-				log.debug('bintouse', bintouse);
-
-				if(bintouse){
-
-					itemsToFullArray[bintouse.index].binonhandavail = Math.abs(itemsToFullArray[bintouse.index].binonhandavail) - Math.abs(newQty);
-					
-					var binString =  bintouse.binnumber + '(' + Math.abs(newQty) + ')' ;
-
-					log.debug('binString ', binString );
-			
-					var itemObj = {item: id, orderid: orderid, qtyCommitted :newQty, binString:binString, parentId: "", memberQty: 0};
-
-				}
-
-
+				var itemObj = {
+					item: id, 
+					orderid: orderid, 
+					qtyCommitted:qtyNeeded, 
+					binString: itemData.binString, 
+					parentId: "", 
+					parentQtyCom: 0, 
+					memberQty: 0, 
+					qtyFulfilled: itemData.qtyFulfilled,
+					bins: itemData.bins
+				};
+			  
 				if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
 					parentVal =  null;
 					parentTxt = null;
@@ -184,17 +181,20 @@ function(record, search, email, runtime, lodash) {
 				 // want to push parent to kit
 					itemObj['parentId'] = parentVal;
 					itemObj['memberQty'] = qty/parentQty;
-					
+					itemObj['parentQtyCom'] = parentQty;
+				
 				 }     
 				
 				
 				if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemType == "Kit"){
 					
-					log.debug('debug', 'dont add assembly members');
+					//log.debug('debug', 'dont add assembly members');
 					
 				}else{
 
-					ordersToFullfillArray.push(itemObj);
+					if(itemData.binString){
+					  ordersToFullfillArray.push(itemObj);
+					}
 
 				}
 
@@ -202,7 +202,7 @@ function(record, search, email, runtime, lodash) {
 			
 		   });
 
-		   log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
+		 //  log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
 
 			//consolidate item fulfillments based on sales order
 			var grouped = _.groupBy(ordersToFullfillArray, function(IF) {
@@ -211,19 +211,27 @@ function(record, search, email, runtime, lodash) {
 	
 			log.debug('grouped array', JSON.stringify(grouped));
 
-			log.debug('itemsToFullArray after remove qty', JSON.stringify(itemsToFullArray));
+		//	log.debug('itemsToFullArray after remove qty', JSON.stringify(itemsToFullArray));
 
 			// need to determine how many kits we can fulfill
 
 			//loop though grouped array and create fulfillments
 			Object.keys(grouped).forEach(function(key, index) {
 
-				var kitIds = grouped[key].map(function (item) {
-					return item.parentId;
-				  });
-	
-				log.debug('kitIds', JSON.stringify(kitIds));
+				//kits need to be fulfilled differently
+				var kitItems = _.filter(grouped[key], function(o) { return o.parentId; });	
+				var soItems = _.filter(grouped[key], function(o) { return !o.parentId; });	
+
+				var groupedKits = _.groupBy(kitItems, function(IF) {
+					return IF.parentId;
+					});
+
+				log.debug('kitIds', JSON.stringify(groupedKits));
+
+				log.debug('soItems', JSON.stringify(soItems));
+
 		
+				//create fulfillment record
 				var fulfillmentRecord = record.transform({
 					   fromType: record.Type.SALES_ORDER,
 					   fromId: parseInt(key),
@@ -242,8 +250,6 @@ function(record, search, email, runtime, lodash) {
 				   });	 
 				 
 				 for (var i = 0; i <= numLines-1; i++) {
-
-					//pull all kit parents and skip
 					 
 					   fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
@@ -254,30 +260,117 @@ function(record, search, email, runtime, lodash) {
 					 
 				 }
 				 		   
-				  log.debug('key', key);
+				//  log.debug('key', key);
 			  //	log.debug('index', index);	
 			  
-			   //recieve kits
-			   if(kitIds){
-					for (var i in kitIds) {
-						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
+			   //set parent kit build bin string then put back in items
+			   if(kitItems){
+					Object.keys(groupedKits).forEach(function(key, index) {
+		   
+					  log.debug('key', key);
+					  var canFulfill = [];
+						// parent is key
+						// find the qty tryign to be fullfilled 
+						var kitLineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
 							fieldId: 'item',
-							value: kitIds[i]
+							value: key
 						 }); 
 
-						 fulfillmentRecord.setSublistValue({
+						 var qtyNeeded = fulfillmentRecord.getSublistValue({
 							sublistId: 'item',
-							fieldId: 'itemreceive',
-							line: parseInt(lineNumber),
-							value: true
+							fieldId: 'quantity',
+							line: parseInt(kitLineNumber),
 						});
 
-					}
-		     	}
+							log.debug('kitLineNumber', kitLineNumber);
+							log.debug('qtyNeeded', qtyNeeded);
+
+						//and then how much can I fulfill
+						// qtyfuliiled divied by member qty for each member take the lowest number thats how many you can fulfill
+						_.forEach(groupedKits[key], function(item) {
+							canFulfill.push(Math.abs(item.qtyFulfilled) / Math.abs(item.memberQty));
+						});
+
+						//take the lowest number and build the bin string
+						canFulfill.sort();
+						var setQty = canFulfill[0];
+
+						log.debug('canFulfill[0]', canFulfill[0]);
+
+						//set kit parent qty
+						fulfillmentRecord.setSublistValue({
+							sublistId: 'item',
+							fieldId: 'itemreceive',
+							line: parseInt(kitLineNumber),
+							value: true
+						});	
+						 
+						 fulfillmentRecord.setSublistValue({
+							sublistId: 'item',
+							fieldId: 'quantity',
+							line: parseInt(kitLineNumber),
+							value: Math.abs(setQty)
+						});
+
+						_.forEach(groupedKits[key], function(item) {	
+							//loop through bin array
+							// how much of each member do I need? setQty times memberQty
+						
+							var memNeeded =  Math.abs(setQty) *  Math.abs(item.memberQty);
+							var qtyUnfulfilled = 0;
+							var qtyToFulfill = memNeeded;
+							var qtyFulfilled = 0;
+							var binString = "";
+							
+							_.forEach(item.bins, function(bin) {
+
+								log.debug('item', item.item);
+								log.debug('memNeeded', memNeeded);
+
+								if(memNeeded > 0){
+								
+										var avilableQty = bin.qty;
+
+										qtyUnfulfilled = Math.abs(qtyToFulfill) - Math.abs(avilableQty);
+									
+										if(qtyUnfulfilled <= 0){
+											qtyFulfilled = Math.abs(qtyToFulfill);
+										}else{
+										qtyFulfilled = Math.abs(qtyToFulfill) - Math.abs(qtyUnfulfilled);
+										}
+
+											if(binString){
+												binString =  bin.bin + '(' + Math.abs(qtyFulfilled) + ')' + ',' + binString;
+											}else{
+												binString =  bin.bin + '(' + Math.abs(qtyFulfilled) + ')' ;
+										}
+						
+										if(qtyUnfulfilled <= 0){
+											memNeeded = 0;
+										}else{
+										//	itemData.qtyFulfilled =  itemData.qtyFulfilled + Math.abs(qtyFulfilled);
+											qtyToFulfill =  Math.abs(qtyFulfilled);
+										}
+
+									}
+		
+								   
+	
+							});
+
+							//push to soitem array
+							item.binString = binString;
+							soItems.push(item);
+							
+						});
+
+						
+					});
+			   }
 
 				  
-				  _.forEach(grouped[key], function(arrayItem) {
+				  _.forEach(soItems, function(arrayItem) {
 					  
 					  log.debug('item', arrayItem.item); 
 					  log.debug('bin', arrayItem.binString); 
@@ -292,7 +385,7 @@ function(record, search, email, runtime, lodash) {
 						  
 						  log.debug('line num', lineNumber);
 						  
-						fulfillmentRecord.setSublistValue({
+					  fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
 						   fieldId: 'itemreceive',
 						   line: parseInt(lineNumber),
@@ -303,7 +396,7 @@ function(record, search, email, runtime, lodash) {
 						   sublistId: 'item',
 						   fieldId: 'quantity',
 						   line: parseInt(lineNumber),
-						   value: Math.abs(arrayItem.qtyCommitted)
+						   value: Math.abs(arrayItem.qtyFulfilled)
 					   }); 
 					   
 						fulfillmentRecord.setSublistValue({
@@ -336,6 +429,63 @@ function(record, search, email, runtime, lodash) {
 		 	 		
 		 }else{
 			 
+		 }
+
+		 function checkBins(itemsToFullArray, id, qtyNeeded){
+
+			var itemData = {};
+			itemData.qtyFulfilled = 0;
+			itemData.binString = "";
+			itemData.bins = [];
+			var qtyUnfulfilled = 0;
+			var qtyToFulfill = qtyNeeded;
+			var qtyFulfilled = 0;
+		
+			//find all bin objects and pull them out    ||   pulls an array of objects
+			var itemBins = _.filter(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail > 0;});
+			if(!itemBins){
+				return;
+			}
+			itemBins = _.sortBy(itemBins, ['binonhandavail']);
+
+			//loop through item bins
+			itemBins.forEach(function (item) {
+
+				//log.debug('qtyToFulfill in loop', qtyToFulfill);
+				//log.debug('item.binnumber ', item.binnumber);
+				//check if bin can fulfill all quantity 
+				var avilableQty = item.binonhandavail;
+
+				qtyUnfulfilled = Math.abs(qtyToFulfill) - Math.abs(avilableQty);
+			
+				if(qtyUnfulfilled <= 0){
+					qtyFulfilled = Math.abs(qtyToFulfill);
+				}else{
+				qtyFulfilled = Math.abs(qtyToFulfill) - Math.abs(qtyUnfulfilled);
+				}
+
+				itemsToFullArray[item.index].binonhandavail = Math.abs(itemsToFullArray[item.index].binonhandavail) - Math.abs(qtyFulfilled);	
+				itemData.bins.push({bin: item.binnumber, qty:  Math.abs(qtyFulfilled)});		
+
+				if(itemData.binString){
+					itemData.binString =  item.binnumber + '(' + Math.abs(qtyFulfilled) + ')' + ',' + itemData.binString;
+				}else{
+					itemData.binString =  item.binnumber + '(' + Math.abs(qtyFulfilled) + ')' ;
+				}
+
+				if(qtyUnfulfilled < 0){
+					itemData.qtyFulfilled = Math.abs(qtyToFulfill);
+					return ;
+				}else{
+
+					itemData.qtyFulfilled =  itemData.qtyFulfilled + Math.abs(qtyFulfilled);
+					qtyToFulfill =  Math.abs(qtyFulfilled);
+				}
+
+			});
+
+			return itemData;
+			
 		 }
 
     }

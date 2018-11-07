@@ -55,6 +55,8 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
+				log.debug('item bin', result.id);
+
 				var binnumber = result.getValue({
 					name: 'binnumber'
 				});
@@ -107,6 +109,8 @@ function(record, search, email, runtime, lodash, url, https) {
 			ordersToFullfill.run().each(function(result) {
 	    	   	 
 				var id = result.id;
+
+				log.debug('result.id in order', result.id)
 				
 				var itemType = result.getValue({
 					name: 'type'
@@ -188,7 +192,7 @@ function(record, search, email, runtime, lodash, url, https) {
 				
 				if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemType == "Kit"){
 					
-					//log.debug('debug', 'dont add assembly members');
+					log.debug('debug', 'dont add assembly members');
 					
 				}else{
 
@@ -202,14 +206,14 @@ function(record, search, email, runtime, lodash, url, https) {
 			
 		   });
 
-		 //  log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
+		  log.debug('ordersToFullfillArray', JSON.stringify(ordersToFullfillArray));
 
 			//consolidate item fulfillments based on sales order
 			var grouped = _.groupBy(ordersToFullfillArray, function(IF) {
 			return IF.orderid;
 			});
 	
-			//log.debug('grouped array', JSON.stringify(grouped));
+			log.debug('grouped array', JSON.stringify(grouped));
 
 			var result = Object.keys(grouped).map(function (key) {
 				return { key: key, value: grouped[key] };
@@ -266,8 +270,8 @@ function(record, search, email, runtime, lodash, url, https) {
 			//loop through item bins
 			itemBins.forEach(function (item) {
 
-				//log.debug('qtyToFulfill in loop', qtyToFulfill);
-				//log.debug('item.binnumber ', item.binnumber);
+				log.debug('qtyToFulfill in loop', qtyToFulfill);
+				log.debug('item.binnumber ', item.binnumber);
 				//check if bin can fulfill all quantity 
 				var avilableQty = item.binonhandavail;
 

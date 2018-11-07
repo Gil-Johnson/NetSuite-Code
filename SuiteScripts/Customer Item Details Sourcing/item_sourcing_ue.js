@@ -64,7 +64,8 @@ function userEventBeforeSubmit(type){
             nlapiLogExecution('DEBUG', 'Step-3' , nlapiGetContext().getRemainingUsage());
             var itemIdArray = getItemIdArrayAndSetCommission(commisionTxt,commisionVal);
             nlapiLogExecution('DEBUG', 'Step-4' , nlapiGetContext().getRemainingUsage());
-            sourceLineItemCsvOrWebservice(customerId, itemIdArray);
+            var customLabel = nlapiGetFieldValue('custbody_reqcustlabelformat');
+            sourceLineItemCsvOrWebservice(customerId, itemIdArray, customLabel);
             nlapiLogExecution('DEBUG', 'Step-5' + nlapiGetContext().getRemainingUsage());
         // feature: sourcing line item: end
         }

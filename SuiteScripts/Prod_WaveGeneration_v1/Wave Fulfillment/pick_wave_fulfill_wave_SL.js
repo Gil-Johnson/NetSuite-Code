@@ -109,10 +109,12 @@ function(record, search, lodash) {
 
 						//take the lowest number and build the bin string
 						canFulfill.sort();
-						var setQty = canFulfill[0];
+						var setQty = parseInt(canFulfill[0]);
 
 						log.debug('canFulfill[0]', canFulfill[0]);
 
+					//need to be able to fulfill at least 1 kit	
+					if(setQty >= 1){
 						//set kit parent qty
 						fulfillmentRecord.setSublistValue({
 							sublistId: 'item',
@@ -179,12 +181,14 @@ function(record, search, lodash) {
 							soItems.push(item);
 							
 						});
-
+					}//if set qty is > 1
 						
 					});
 			   }
 
-				  
+			   log.debug('soItems', JSON.stringify(soItems));
+
+				if(soItems.length > 0){  
 				  _.forEach(soItems, function(arrayItem) {
 					  
 					  log.debug('item', arrayItem.item); 
@@ -229,6 +233,13 @@ function(record, search, lodash) {
 					  log.debug('error saving fulfillment', JSON.stringify(e));
 				  }
 					log.debug('fulfillmentid', fulfillmentid);
+					response ='test';
+
+				}// nothing to fulfill
+				else{
+					log.debug('nothing can be fulfilled');
+					response = '<h2> Not enough quantity to fulfill </h2>';
+				}
 
 			  });
 	    	 	 
@@ -242,7 +253,7 @@ function(record, search, lodash) {
 		 }
 	 		         
 	                  
-	       context.response.write('test');
+	       context.response.write(response);
 	    		 
 		 	 		
 		 }else{

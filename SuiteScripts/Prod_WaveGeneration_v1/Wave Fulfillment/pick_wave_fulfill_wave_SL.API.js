@@ -30,8 +30,8 @@ function(record, search, email, runtime, lodash, url, https) {
 			 var ordersToFullfillArray = [];
 			 var index = 0;
 
-			// log.debug('waveid', waveid);	
-			// log.debug('orderid ', orderid);
+			 log.debug('waveid', waveid);	
+			 log.debug('orderid ', orderid);
 
 			 if(!waveid && !orderid){
 				 context.response.write('error please contact your NetSuite admin');
@@ -44,8 +44,8 @@ function(record, search, email, runtime, lodash, url, https) {
 			});
 
 			itemsToFulfill.filters.push( search.createFilter({
-				name: 'custrecord_current_wave',
 				join: 'binnumber',
+				name: 'custrecord_current_wave',
 				operator: search.Operator.IS,
 				values: waveid
 			})); 

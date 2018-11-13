@@ -44,7 +44,7 @@ function createPickRecords(request, response)
 	
 	
 	// Execute the search. You must specify the internal ID of the record type.
-	var searchresults = nlapiSearchRecord( 'item', 'customsearch5086', filters, columns );
+	var searchresults = nlapiSearchRecord( 'item', 'customsearch_create_pick_records_sl', filters, columns );
 	
 //	nlapiLogExecution('DEBUG','item values' , JSON.stringify(searchresults));
 	

@@ -77,7 +77,7 @@ function(record, search, email, runtime, lodash, url, https) {
 
 			//run search to pull all orders with wave
 			var ordersToFullfill = search.load({
-				id: 'customsearch5111',
+				id: 'customsearch6586',
 			});
 
 				ordersToFullfill.filters.push( search.createFilter({
@@ -236,7 +236,7 @@ function(record, search, email, runtime, lodash, url, https) {
 				log.debug('orders chuncked' + i , JSON.stringify(chuckedData[i]));
 
                                            
-				https.post({url: 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=502&deploy=1&compid=3500213&h=1d64da2b98ee1dd7500c', body: parameters});
+				https.post({url: 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=602&deploy=1&compid=3500213&h=92969a82260a9609e499', body: parameters});
 
 	          }  
 

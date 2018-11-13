@@ -37,28 +37,28 @@ var F3BaseUISuitelet = Fiber.extend(function () {
         getDependencyFileIds: function() {
             // v2.2
             var fileIds = [
-                3326912, // bootstrap-datepicker3.min.css
-                3326908, // ui.jqgrid-bootstrap.css
-                3326909, // f3.ppt.css
-                3326911, // f3.ppt.min.css
+                6062797, // bootstrap-datepicker3.min.css
+                6062794, // ui.jqgrid-bootstrap.css
+                6062793, // f3.ppt.css
+                6062795, // f3.ppt.min.css
 
-                3326914, // jquery-1.11.0.min.js
-                3326920, // jquery.jqGrid.min.js
-                3326917, // grid.locale-en.js
+                6062799, // jquery-1.11.0.min.js
+                6062805, // jquery.jqGrid.min.js
+                6062802, // grid.locale-en.js
 
-                3326939, // fiber.min.js
-                3326938, // underscore-min.js
-                3326923, // jstorage.js
+                6062824, // fiber.min.js
+                6062823, // underscore-min.js
+                6062809, // jstorage.js
 
-                3326924, // f3.init.js
-                3326922, // f3.ui-manager.js
-                3326918, // f3.data-manager.js
-                3326921, // f3.state-manager.js
-                3326919, // f3.tooltip-manager.js
+                6062808, // f3.init.js
+                6062807, // f3.ui-manager.js
+                6062803, // f3.data-manager.js
+                6062806, // f3.state-manager.js
+                6062804, // f3.tooltip-manager.js
 
-                3326913, // f3.ppt.min.js
-                3326926, // bootstrap-datepicker.min.js
-                3326915 // typeahead.jquery.min.js
+                6062798, // f3.ppt.min.js
+                6062811, // bootstrap-datepicker.min.js
+                6062800 // typeahead.jquery.min.js
             ];
 
             return fileIds;

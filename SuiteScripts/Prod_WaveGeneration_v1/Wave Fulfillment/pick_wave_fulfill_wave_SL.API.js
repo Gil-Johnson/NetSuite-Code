@@ -55,7 +55,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-				log.debug('item bin', result.id);
+				//log.debug('item bin', result.id);
 
 				var binnumber = result.getValue({
 					name: 'binnumber'
@@ -110,7 +110,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-				log.debug('result.id in order', result.id)
+			//	log.debug('result.id in order', result.id)
 				
 				var itemType = result.getValue({
 					name: 'type'
@@ -192,7 +192,7 @@ function(record, search, email, runtime, lodash, url, https) {
 				
 				if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemType == "Kit"){
 					
-					log.debug('debug', 'dont add assembly members');
+					//log.debug('debug', 'dont add assembly members');
 					
 				}else{
 
@@ -214,22 +214,27 @@ function(record, search, email, runtime, lodash, url, https) {
 			});
 	
 			log.debug('grouped array', JSON.stringify(grouped));
+			
 
 			var result = Object.keys(grouped).map(function (key) {
 				return { key: key, value: grouped[key] };
 			  });
 
 			  log.debug('result', JSON.stringify(result)); 
+			  log.audit('result', result.length); 
+
+			
 	
 
 			//chunk into 20 orders per request
-			var chuckedData = _.chunk(result, 10);
+			var chuckedData = _.chunk(result, 7);
 
 		    for (var i = 0; i < chuckedData.length; i++) {
 
 				var parameters = {orders: JSON.stringify(chuckedData[i])};
 
 				log.debug('orders chuncked' + i , JSON.stringify(chuckedData[i]));
+
                                            
 				https.post({url: 'https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=502&deploy=1&compid=3500213&h=1d64da2b98ee1dd7500c', body: parameters});
 
@@ -259,6 +264,7 @@ function(record, search, email, runtime, lodash, url, https) {
 			var qtyUnfulfilled = 0;
 			var qtyToFulfill = qtyNeeded;
 			var qtyFulfilled = 0;
+			//keep a counter of qty fulfilled it is inaccurate
 		
 			//find all bin objects and pull them out    ||   pulls an array of objects
 			var itemBins = _.filter(itemsToFullArray, function(o) { return o.item === id && o.binonhandavail > 0;});
@@ -267,9 +273,13 @@ function(record, search, email, runtime, lodash, url, https) {
 			}
 			itemBins = _.sortBy(itemBins, ['binonhandavail']);
 
-			//loop through item bins
+			//loop through item bins   script is over fulfilling taking qty from second bin when it doesn't need it
+			
 			itemBins.forEach(function (item) {
 
+			if(qtyToFulfill >= 0){ //prevent overfulfillment
+
+				log.debug('item', id);
 				log.debug('qtyToFulfill in loop', qtyToFulfill);
 				log.debug('item.binnumber ', item.binnumber);
 				//check if bin can fulfill all quantity 
@@ -292,14 +302,16 @@ function(record, search, email, runtime, lodash, url, https) {
 					itemData.binString =  item.binnumber + '(' + Math.abs(qtyFulfilled) + ')' ;
 				}
 
-				if(qtyUnfulfilled < 0){
-					itemData.qtyFulfilled = Math.abs(qtyToFulfill);
+				if(qtyUnfulfilled <= 0){ // whenever picked from multiple bins qty fullfilled is wrong
+					itemData.qtyFulfilled = Math.abs(qtyNeeded);
+					qtyToFulfill  = 0;
 					return ;
 				}else{
-
-					itemData.qtyFulfilled =  itemData.qtyFulfilled + Math.abs(qtyFulfilled);
-					qtyToFulfill =  Math.abs(qtyFulfilled);
+					itemData.qtyFulfilled =   Math.abs(qtyNeeded) - Math.abs(qtyUnfulfilled);
+					qtyToFulfill =  Math.abs(qtyUnfulfilled);
 				}
+
+			}
 
 			});
 

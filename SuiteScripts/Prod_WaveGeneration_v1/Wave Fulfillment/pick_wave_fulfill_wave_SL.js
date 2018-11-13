@@ -24,6 +24,7 @@ function(record, search, lodash) {
 		 try{
 
 			log.debug('in suitelet', 'calling suitelet');
+			var response1 = "";
 	    	
 	    	//retrive parameters 
 			 var orders = context.request.parameters.orders; 
@@ -43,7 +44,7 @@ function(record, search, lodash) {
 					return IF.parentId;
 					});
 
-				log.debug('kitIds', JSON.stringify(groupedKits));
+				log.audit('kitIds', JSON.stringify(groupedKits));
 				log.debug('soItems', JSON.stringify(soItems));
 	
 				//create fulfillment record
@@ -80,6 +81,7 @@ function(record, search, lodash) {
 			  
 			   //set parent kit build bin string then put back in items
 			   if(kitItems){
+
 					Object.keys(groupedKits).forEach(function(key, index) {
 		   
 					  log.debug('key', key);
@@ -107,11 +109,17 @@ function(record, search, lodash) {
 							canFulfill.push(Math.abs(item.qtyFulfilled) / Math.abs(item.memberQty));
 						});
 
-						//take the lowest number and build the bin string
+						//take the lowest number if it's lower then the needed qty and build the bin string
 						canFulfill.sort();
-						var setQty = parseInt(canFulfill[0]);
+
+						var setQty = parseInt(qtyNeeded);
+						if(parseInt(canFulfill[0]) < parseInt(qtyNeeded)){
+							setQty = parseInt(canFulfill[0]);
+						}
+						
 
 						log.debug('canFulfill[0]', canFulfill[0]);
+						log.debug('trying to fulfill', setQty);
 
 					//need to be able to fulfill at least 1 kit	
 					if(setQty >= 1){
@@ -143,9 +151,9 @@ function(record, search, lodash) {
 							_.forEach(item.bins, function(bin) {
 
 								log.debug('item', item.item);
-								log.debug('memNeeded', memNeeded);
+								log.debug('memNeeded', qtyToFulfill);
 
-								if(memNeeded > 0){
+						    if(qtyToFulfill >= 0){ //prevent overfulfillment
 								
 										var avilableQty = bin.qty;
 
@@ -162,13 +170,15 @@ function(record, search, lodash) {
 											}else{
 												binString =  bin.bin + '(' + Math.abs(qtyFulfilled) + ')' ;
 										}
-						
-										if(qtyUnfulfilled <= 0){
-											memNeeded = 0;
+
+										if(qtyUnfulfilled <= 0){ // whenever picked from multiple bins qty fullfilled is wrong
+											qtyToFulfill  = 0;
+											return ;
 										}else{
-										//	itemData.qtyFulfilled =  itemData.qtyFulfilled + Math.abs(qtyFulfilled);
-											qtyToFulfill =  Math.abs(qtyFulfilled);
+											
+											qtyToFulfill =  Math.abs(qtyUnfulfilled);
 										}
+						
 
 									}
 		
@@ -230,15 +240,16 @@ function(record, search, lodash) {
 					var fulfillmentid = fulfillmentRecord.save();
 				  }catch(e){
 					  
-					  log.debug('error saving fulfillment', JSON.stringify(e));
+					  log.error(JSON.stringify(e.name), JSON.stringify(soItems));
+					
 				  }
 					log.debug('fulfillmentid', fulfillmentid);
-					response ='test';
+					response1 ='test';
 
 				}// nothing to fulfill
 				else{
 					log.debug('nothing can be fulfilled');
-					response = '<h2> Not enough quantity to fulfill </h2>';
+					response1 = '<h2> Not enough quantity to fulfill </h2>';
 				}
 
 			  });
@@ -253,7 +264,7 @@ function(record, search, lodash) {
 		 }
 	 		         
 	                  
-	       context.response.write(response);
+	       context.response.write(response1);
 	    		 
 		 	 		
 		 }else{

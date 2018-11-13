@@ -138,6 +138,7 @@ function createPickRecords(request, response)
 				var rec = nlapiCreateRecord('customrecord_pick_task');
 				rec.setFieldValue('custrecord_pick_task_item', key);
 				rec.setFieldValue('custrecord_wave_pick_quantity', parseFloat(items[key]));
+				rec.setFieldValue('custrecord_wave_pick_qty_remaining', parseFloat(items[key]));
 				rec.setFieldValue('custrecord_pick_task_wave', waveid); 
 				 
 				try{

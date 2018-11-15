@@ -78,8 +78,8 @@ var F3BaseUISuitelet = Fiber.extend(function () {
                 var location = nlapiGetLocation();
                 F3.Util.Utility.logDebug('location', location);
 
-                var suiteletScriptId = 'customscriptwp__ppt_api_suitelet';
-                var suiteletDeploymentId = 'customdeploywp_ppt_api_suitele';
+                var suiteletScriptId = 'customscript_prod_wave_api';
+                var suiteletDeploymentId = 'customdeploy_prod_wave_api';
                 var apiSuiteletUrl = nlapiResolveURL('SUITELET', suiteletScriptId, suiteletDeploymentId, false);
 
                 var data = nlapiLoadFile(this.getFileUrl());

@@ -92,7 +92,7 @@ function createPickRecords(request, response)
 			//var preferredbin = _.find(itemSearching, {'item': itemId});	
 		try{
 
-	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T' &&  parseFloat(item.binonhand) >=  parseFloat(items[key])});
+	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.bintype === 'Overstock' &&  parseFloat(item.binonhand) >=  parseFloat(items[key])});
 		   nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
 		  
 		       if(preferredbin){	
@@ -100,27 +100,10 @@ function createPickRecords(request, response)
 				binToUse = preferredbin.bin;
 		    		  	    	   	    	   
 		       }else{
-		    	   
-				   var primarybin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'F' && (item.bintype === 'Primary' || item.bintype === 'Overstock')});
-				   
-				   if(primarybin){ 
-
-					binToUse = primarybin.bin;
-			    		   	 	   	    	   
-			         } else{
-			        	 
-			        	   var putNobin = _.find(itemSearching,  function(item){ return item.item === key && (item.bintype === 'Primary' || item.bintype === 'Overstock');});
-						    
-						    if(!putNobin){
-								binToUse = 34329;
-						    } else {
-						    	
-						    	var preBin2 = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
-								binToUse = preBin2.bin;
-						    }
-			        	 
-			        	 
-			         }   
+				   	    	   	
+					var preBin2 = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
+					binToUse = preBin2.bin;
+	          
 			   }
 			}catch(e){
 
@@ -129,10 +112,8 @@ function createPickRecords(request, response)
 			   
 			   nlapiLogExecution('DEBUG', 'item bin values', "item: " + key + "  bin: " + binToUse);      
 			
-		    
+	
 		    try{
-
-			
 
 				//create wave pick record	
 				var rec = nlapiCreateRecord('customrecord_pick_task');
@@ -170,6 +151,7 @@ function createPickRecords(request, response)
 					
 					nlapiLogExecution('error', 'error', JSON.stringify(e));
 				}
+			
 				
 				nlapiLogExecution('DEBUG', 'wavePickTaskid', wavePickTaskid);
 

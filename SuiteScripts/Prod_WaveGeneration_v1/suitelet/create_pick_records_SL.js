@@ -91,8 +91,8 @@ function createPickRecords(request, response)
 			//var preferredbin = _.find(itemSearching, { 'item': itemId, 'preferredbin': 'T'});		
 			//var preferredbin = _.find(itemSearching, {'item': itemId});	
 		try{
-
-	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.bintype === 'Overstock' &&  parseFloat(item.binonhand) >=  parseFloat(items[key])});
+			//select perferred bin or bin with highest Target CO2's to record setup
+	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
 		   nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
 		  
 		       if(preferredbin){	
@@ -100,8 +100,8 @@ function createPickRecords(request, response)
 				binToUse = preferredbin.bin;
 		    		  	    	   	    	   
 		       }else{
-				   	    	   	
-					var preBin2 = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
+
+					var preBin2 = _.find(itemSearching,  function(item){ return item.item === key});
 					binToUse = preBin2.bin;
 	          
 			   }

@@ -54,7 +54,56 @@ function(record, search, email, runtime) {
 
  				// If no results returned
 				// Search all bins for wave number in current wave field and erase value from current wave field. custrecord_current_wave
+						
+			var binsToClear = search.load({
+				id: 'customsearch_clear_wave_from_bins',
+			});
+
+			binsToClear.filters.push( search.createFilter({
+				name: 'custrecord_current_wave',
+				operator: search.Operator.IS,
+				values: waveid
+			})); 
+
+
+			binsToClear.run().each(function(result) {
+	    	   	 
+				var id = result.id;
+
+				log.debug('item bin', result.id);
+
+			record.submitFields({
+					type: record.Type.BIN,
+					id: id,
+					values: {
+						custrecord_current_wave: ""
+					},
+					options: {
+						enableSourcing: false,
+						ignoreMandatoryFields : true
+					}
+				});
+		
+				
+				
+				return true;
+			
+		   });
+
+
 				// Mark wave complete field on wave T - custrecord_wave_complete 
+				record.submitFields({
+					type: 'customrecord_wave',
+					id: waveid,
+					values: {
+						custrecord_wave_complete: true
+					},
+					options: {
+						enableSourcing: false,
+						ignoreMandatoryFields : true
+					}
+				});
+
 
 
 			}

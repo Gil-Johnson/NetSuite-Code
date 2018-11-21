@@ -46,7 +46,7 @@ function userEventBeforeLoad(type, form, request) {
 
         var strURL = nlapiResolveURL('SUITELET', 'customscript_search_wave_complete', 'customdeploy_search_wave_complete') + '&waveid=' + recid;
         var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39);
-        form.addButton('custpage_fulfillwave', 'Complete Wave', scriptbutton);
+        form.addButton('custpage_fulfillwave', 'Release Bins', scriptbutton);
   
 
     }

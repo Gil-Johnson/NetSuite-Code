@@ -31,7 +31,7 @@ function(record, search, email, runtime) {
 
 			 //run search for all orders with a certain wave 
 			var itemsToFulfill = search.load({
-				id: 'customsearch5123',
+				id: 'customsearch_system_clear_wave_bin_sr',
 			});
 
 			itemsToFulfill.filters.push( search.createFilter({
@@ -72,17 +72,27 @@ function(record, search, email, runtime) {
 
 				log.debug('item bin', result.id);
 
-			record.submitFields({
-					type: record.Type.BIN,
-					id: id,
-					values: {
-						custrecord_current_wave: ""
-					},
-					options: {
-						enableSourcing: false,
-						ignoreMandatoryFields : true
-					}
-				});
+				
+         try{
+
+			var objRecord = record.load({
+				type: record.Type.BIN, 
+				id: id,
+				isDynamic: true,
+			});
+
+			objRecord.setValue({
+				fieldId: 'custrecord_current_wave',
+				value: "",
+				ignoreFieldChange: true
+			});
+
+			objRecord.save();
+			
+			}catch(e){
+
+				log.error('error on record submot fopr bin', JSON.stringify(e));
+			}
 		
 				
 				
@@ -119,7 +129,7 @@ function(record, search, email, runtime) {
 		 }
 	 		         
 	                  
-	      // context.response.write('<script> window.history.back() </script>');
+	       context.response.write('<script> window.history.back() </script>');
 	    		 
 		 	 		
 		 }

@@ -30,8 +30,8 @@ function userEventBeforeLoad(type, form, request) {
        
       //  nlapiLogExecution('DEBUG', 'test', 'poId: ' + poId);
  
-        var inlinehtml = form.addField('custpage_printkanban_fld', 'inlinehtml', 'inlinehtml', null, null);
-        nlapiSetFieldValue('custpage_printkanban_fld', '<script> jQuery( document ).ready(function() { jQuery("#custpage_printkanban").on("click", function() { jQuery(this).prop("disabled", true);}); }); </script>', null, null);
+        // var inlinehtml = form.addField('custpage_printkanban_fld', 'inlinehtml', 'inlinehtml', null, null);
+        // nlapiSetFieldValue('custpage_printkanban_fld', '<script> jQuery( document ).ready(function() { jQuery("#custpage_printkanban").on("click", function() { jQuery(this).prop("disabled", true);}); }); </script>', null, null);
 
 
         var strURL = nlapiResolveURL('SUITELET', 'customscript_print_wave_api', 'customdeploy_print_wave_api') + '&waveid=' + recid + '&printtype=kanban';

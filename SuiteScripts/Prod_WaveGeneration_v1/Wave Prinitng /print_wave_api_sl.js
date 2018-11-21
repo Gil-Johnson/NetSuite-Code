@@ -32,37 +32,42 @@ function onRequest(context) {
 			 var pdfToUse = "";
 			 
 			 if(printType == 'kanban'){
-				pdfToUse = 111;
+				  var pdfToUse = 3326952
 			 }
 				
 			 try{
 				var template = file.load({
 					id: pdfToUse
-				}).getContents();
+				})
+
 			}catch(e){
 
 				log.debug('error loading file', JSON.stringify(e));
 			}
 
-				var pageRenderer = render.create();
-				pageRenderer.templateContent = template;
+				var renderer = render.create();
+	
+				renderer.templateContent = template.getContents();
 
-				var dataSource = {};
+				log.debug("template.getContents()", template.getContents());
+
+				// var dataSource = {};
 				
-				pageRenderer.addCustomDataSource({
-					format: render.DataSource.OBJECT,
-					alias: "ds",
-					data: dataSource
-				});
-			 
-				var pdfFile = pageRenderer.renderAsPdf();
+				// pageRenderer.addCustomDataSource({
+				// 	format: render.DataSource.OBJECT,
+				// 	alias: "ds",
+				// 	data: dataSource
+				// });
+				
+				var pdfFile = renderer.renderAsPdf();
 			 
 			    log.debug("finished creating pdf file");
 			 
 			  // pdfFile.name = "inventory_sales_sheet_" + today + '.pdf';
 			 
 		 		
-		    context.response.writeFile(pdfFile);
+		 //   context.response.renderPdf(pdfFile);
+		      context.response.writeFile(pdfFile, true);
 		    
            }catch(e){
 				 

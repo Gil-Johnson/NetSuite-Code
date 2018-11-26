@@ -237,10 +237,18 @@ function(record, search, lodash) {
 					   
 				  });
 				  try{	
-					var fulfillmentid = fulfillmentRecord.save();
+
+					var fulfillmentid = fulfillmentRecord.save({
+						enableSourcing: true,
+						ignoreMandatoryFields: true
+					});;
+
+
 				  }catch(e){
 					  
 					  log.error(JSON.stringify(e.name), JSON.stringify(soItems));
+					  log.error('error on save fulfillment', JSON.stringify(e));
+					  response1 = JSON.stringify(e.message);
 					
 				  }
 					log.debug('fulfillmentid', fulfillmentid);

@@ -34,20 +34,75 @@ function(record, search) {
 			return ns_type;
 			
 		}
+
+	function setMarkTransaction(id) {
+		
+		var markTrans = "";
+		var shippingAddresse = "";
+
+		var fieldLookUp = search.lookupFields({
+			type: search.Type.SALES_ORDER,
+			id: parseInt(id),
+			columns: ['shipaddressee', 'custbody_marktransaction', 'custbody_dropship']
+		});
+
+		log.debug('look up values', JSON.stringify(fieldLookUp));
+		log.debug('look up values', fieldLookUp.shipaddressee);
+
+		try{
+			if(fieldLookUp.custbody_marktransaction)
+			shippingAddresse = fieldLookUp.shipaddressee;  
+		}catch(e){
+			
+		}
+
+		if(fieldLookUp.custbody_marktransaction)
+		   markTrans = fieldLookUp.custbody_marktransaction
+	     
+
+		if(markTrans){
+
+			
+
+		}else{
+
+		if(fieldLookUp.custbody_dropship == true){
+			record.submitFields({
+				type: record.Type.SALES_ORDER,
+				id: parseInt(id),
+				values: {
+					custbody_marktransaction: fieldLookUp.shipaddressee
+				},
+				options: {
+					enableSourcing: false,
+					ignoreMandatoryFields : true
+				}
+			});	
+
+		}
+	}
+		
+	}
 	  
     function afterSubmit(context) {
     	
     	//log.debug('context type', context.UserEventType);
     	
-   	 if (context.type !== context.UserEventType.CREATE){    
+
+   	 try{
+
+		if (context.type === context.UserEventType.DELETE)
+			return;
+    	  
+    	  var orderRecordnew = context.newRecord;
+		  var orderId = orderRecordnew.id;
+		  
+		  setMarkTransaction(orderId);
+
+		if (context.type !== context.UserEventType.CREATE){    
    		 log.debug('returning not create');
     		 return;
     	 }
-   	 
-   	 try{
-    	  
-    	  var orderRecordnew = context.newRecord;
-    	  var orderId = orderRecordnew.id;
     	  
     	  var orderRecord = record.load({
     		    type: record.Type.SALES_ORDER, 
@@ -70,9 +125,7 @@ function(record, search) {
     		    sublistId: 'item'
     		});   
     	  
-    	  
-      	      	  
-    	  
+    	    
     for (var j = 0; j < numLines; j++) { 	    
         	
         
@@ -175,9 +228,7 @@ function(record, search) {
     		 
     	 }	
     	 
-   
-  
-    	    	  
+  	  
     	 orderRecord.save({
     		    enableSourcing: false,
     		    ignoreMandatoryFields: true
@@ -197,7 +248,7 @@ function(record, search) {
 
     return {
      //   beforeLoad: beforeLoad,
-    //    beforeSubmit: beforeSubmit,
+     //   beforeSubmit: beforeSubmit,
         afterSubmit: afterSubmit
     };
     

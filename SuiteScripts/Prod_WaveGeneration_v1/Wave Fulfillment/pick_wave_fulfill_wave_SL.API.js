@@ -227,7 +227,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	
 
 			//chunk into 20 orders per request
-			var chuckedData = _.chunk(result, 7);
+			var chuckedData = _.chunk(result, 5);
 
 		    for (var i = 0; i < chuckedData.length; i++) {
 

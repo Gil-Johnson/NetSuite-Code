@@ -444,6 +444,7 @@ function overwriteGovernanceLimit(){
  */
 function clientRecalc(type){
     //if(type=='item')alert('recalc');
+    var customLabel = nlapiGetFieldValue('custbody_reqcustlabelformat');
     var totalCount = parseInt(nlapiGetFieldValue(COMMON.TOTAL_LINEITEMS_ID));
     var totalLines = parseInt(nlapiGetLineItemCount('item'));
     var difference = totalLines - totalCount;
@@ -490,7 +491,7 @@ function clientRecalc(type){
                         alert('error line num '+i + ' ERROR: ' + ex.message);
                     }
                 }
-                sourceLineItemRelcalc(customerId, itemArr, totalCount+1, totalLines);
+                sourceLineItemRelcalc(customerId, itemArr, totalCount+1, totalLines, customLabel);
             }
 
             setTotalLineItems();

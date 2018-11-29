@@ -48,7 +48,7 @@ function(record, search, email, runtime) {
 
 			if(searchResult.length > 0){
 
-				context.response.write('<h2> Items are still found in the pack bins.  Please move the inventory before closing the wave. </h2>');
+				context.response.write('<h2> Error - This order must be shipped complete. </h2>');
 
 			}else{
 

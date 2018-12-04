@@ -55,7 +55,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-				//log.debug('item bin', result.id);
+				log.debug('item bin', result.id);
 
 				var binnumber = result.getValue({
 					name: 'binnumber'
@@ -72,7 +72,7 @@ function(record, search, email, runtime, lodash, url, https) {
 		   });
 
 
-			//log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
+			log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
 
 
 			//run search to pull all orders with wave
@@ -110,7 +110,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-			//	log.debug('result.id in order', result.id)
+				log.debug('result.id in order', result.id)
 				
 				var itemType = result.getValue({
 					name: 'type'

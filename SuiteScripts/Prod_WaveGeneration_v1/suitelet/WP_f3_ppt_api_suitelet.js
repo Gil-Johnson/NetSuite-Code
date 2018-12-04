@@ -404,24 +404,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             var wave_rec_id = nlapiSubmitRecord(rec, true);
        
             
-            var context1 = nlapiGetContext();
-            
-           if(checkbox.orders.length < 80){
-
-            for ( var x = 0; x < checkbox.orders.length; x++ ) {
-               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
-               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
-             
-               } 
-           }
-            else{
-              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
-              url += '&orders=' + encodeURIComponent(checkbox.orders);	
-              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-              nlapiRequestURL(url);	
-       }
-            	
-          
+            var context1 = nlapiGetContext(); 
 
             var pickItems = _.pullAllBy(itemJSON, [{ 'qtyCommitted': "" }, { 'qtyCommitted': 0 }, { 'qtyCommitted': null }], 'qtyCommitted');
             nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
@@ -473,6 +456,21 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
               nlapiRequestURL(url); 		           	
 
           }  
+
+          if(checkbox.orders.length < 80){
+
+            for ( var x = 0; x < checkbox.orders.length; x++ ) {
+               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
+               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
+             
+               } 
+           }
+            else{
+              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
+              url += '&orders=' + encodeURIComponent(checkbox.orders);	
+              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+              nlapiRequestURL(url);	
+            }
 
 
             nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());

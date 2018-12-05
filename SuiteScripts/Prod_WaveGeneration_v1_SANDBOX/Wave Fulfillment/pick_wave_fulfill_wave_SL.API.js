@@ -160,6 +160,7 @@ function(record, search, email, runtime, lodash, url, https) {
 				var itemObj = {
 					item: id, 
 					orderid: orderid, 
+					multipleonorder: "F",
 					qtyCommitted:qtyNeeded, 
 					binString: itemData.binString, 
 					parentId: "", 
@@ -197,6 +198,20 @@ function(record, search, email, runtime, lodash, url, https) {
 				}else{
 
 					if(itemData.binString){
+					
+					var found = _.find(ordersToFullfillArray, { 'item': id, 'orderid': orderid });
+
+					if(found){
+						//there;s 2 items on one order need to add treu to both or all items
+						itemObj.multipleonorder = "T";
+
+						ordersToFullfillArray.forEach(function (item) {
+							if(item.item == id){
+								item.multipleonorder = "T";
+							}
+						});
+					}
+
 					  ordersToFullfillArray.push(itemObj);
 					}
 

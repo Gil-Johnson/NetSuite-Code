@@ -87,7 +87,11 @@ function(record, search, lodash) {
 					  log.debug('key', key);
 					  var canFulfill = [];
 						// parent is key
+
 						// find the qty tryign to be fullfilled 
+						//check if item is multiple if it is we need to loop through the sublist and 
+						//find the instance that matches qty and not recieved 
+
 						var kitLineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
 							fieldId: 'item',
@@ -117,7 +121,6 @@ function(record, search, lodash) {
 							setQty = parseInt(canFulfill[0]);
 						}
 						
-
 						log.debug('canFulfill[0]', canFulfill[0]);
 						log.debug('trying to fulfill', setQty);
 
@@ -181,8 +184,6 @@ function(record, search, lodash) {
 						
 
 									}
-		
-								   
 	
 							});
 
@@ -205,12 +206,42 @@ function(record, search, lodash) {
 					  log.debug('bin', arrayItem.binString); 
 					  log.debug('qty', Math.abs(arrayItem.qtyCommitted)); 
 						  
-												 
+					if(arrayItem.multipleonorder === "F"){
+						log.debug('not multiple item on same order');
 						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
 							fieldId: 'item',
 							value: arrayItem.item
 						 }); 
+					}else{
+						log.debug('multiple item on same order');
+						//loop through fulfilllment sublist match qty and ensure it's already niot set to shipped
+						for (var m = 0; m <= numLines-1; m++) {
+					 
+						var itemIdm = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'item',
+							line: m,
+						});	
+
+						var itemQtym = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'quantity',
+							line: m,
+						});
+							
+					   var itemRecm = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'itemreceive',
+							line: m,
+					   });	
+					   
+					   
+					   
+						  
+					  }
+
+					}
 						  
 						  log.debug('line num', lineNumber);
 						  
@@ -254,9 +285,6 @@ function(record, search, lodash) {
 
 			  });
 	    	 	 
-	    	 
-		
-	    	
 		 }catch(e){
 			 
 			 var error = log.error("error", JSON.stringify(e));

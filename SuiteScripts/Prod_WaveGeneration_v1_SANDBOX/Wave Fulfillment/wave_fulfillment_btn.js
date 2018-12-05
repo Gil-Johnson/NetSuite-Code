@@ -37,7 +37,7 @@ function userEventBeforeLoad(type, form, request) {
         if (status != 3) {
 
             nlapiLogExecution('DEBUG', 'test', 'poId: ' + recid);
-            var strURL = nlapiResolveURL('SUITELET', 'customscript_pick_wave_api_sl', 'customdeploy_pick_wave_api_sl') + '&waveid=' + recid;
+            var strURL = nlapiResolveURL('SUITELET', 'customscript_wave_fulfillments', 'customdeploy_wave_fulfillments') + '&waveid=' + recid;
             var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39)  ;
             form.addButton('custpage_fulfillwave', 'Fulfill Wave', scriptbutton);
 

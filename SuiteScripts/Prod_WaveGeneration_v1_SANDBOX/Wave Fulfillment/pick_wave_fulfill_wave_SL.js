@@ -35,10 +35,15 @@ function(record, search, lodash) {
 			//need to loop through an rray of objects
 			//Object.keys(ordersToFulfill).forEach(function(key, index) {
 		   ordersToFulfill.forEach(function (arrayItem) {
-
+				var hasMulti = false;
+				var multiItem = [];
 				//kits need to be fulfilled differently
 				var kitItems = _.filter(arrayItem.value, function(o) { return o.parentId; });	
 				var soItems = _.filter(arrayItem.value, function(o) { return !o.parentId; });	
+				var hasMultiSameItem = _.find(arrayItem.value, { 'multipleonorder': 'T' });
+				if(hasMultiSameItem){
+					hasMulti = true;
+				}
 
 				var groupedKits = _.groupBy(kitItems, function(IF) {
 					return IF.parentId;
@@ -73,6 +78,35 @@ function(record, search, lodash) {
 						   line: i,
 						   value: false
 					   });	
+
+				if(hasMulti == true){
+					   // if any contain multiple then build lines with ids
+					   var itemIdm = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'item',
+							line: i,
+					    });	
+
+						var itemQtym = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'quantity',
+							line: i,
+						});
+						
+						var itemRecm = fulfillmentRecord.getSublistValue({
+								sublistId: 'item',
+								fieldId: 'itemreceive',
+								line: i,
+						});	
+
+						var lineNumberm = fulfillmentRecord.getSublistValue({
+							sublistId: 'item',
+							fieldId: 'line',
+							line: i,
+						});	
+
+						multiItem.push({item:itemIdm,qty:itemQtym,recieved:itemRecm, line:lineNumberm, used:false, index:i});
+					}
 					 
 				 }
 				 		   
@@ -198,52 +232,35 @@ function(record, search, lodash) {
 			   }
 
 			   log.debug('soItems', JSON.stringify(soItems));
-
+			
 				if(soItems.length > 0){  
 				  _.forEach(soItems, function(arrayItem) {
 					  
+					var lineNumber = -1;
+					
 					  log.debug('item', arrayItem.item); 
 					  log.debug('bin', arrayItem.binString); 
 					  log.debug('qty', Math.abs(arrayItem.qtyCommitted)); 
 						  
 					if(arrayItem.multipleonorder === "F"){
 						log.debug('not multiple item on same order');
-						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
+						lineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
 							fieldId: 'item',
 							value: arrayItem.item
 						 }); 
 					}else{
-						log.debug('multiple item on same order');
-						//loop through fulfilllment sublist match qty and ensure it's already niot set to shipped
-						for (var m = 0; m <= numLines-1; m++) {
-					 
-						var itemIdm = fulfillmentRecord.getSublistValue({
-							sublistId: 'item',
-							fieldId: 'item',
-							line: m,
-						});	
-
-						var itemQtym = fulfillmentRecord.getSublistValue({
-							sublistId: 'item',
-							fieldId: 'quantity',
-							line: m,
-						});
-							
-					   var itemRecm = fulfillmentRecord.getSublistValue({
-							sublistId: 'item',
-							fieldId: 'itemreceive',
-							line: m,
-					   });	
-					   
-					   
-					   
-						  
-					  }
-
+					
+						log.debug('array vals', multiItem);
+						//look for item in multi array 
+						var newItem = _.find(multiItem, { 'item': arrayItem.item, 'used': false,'qty': arrayItem.qtyCommitted});
+						lineNumber = parseInt(newItem.index);
+						multiItem[newItem.index].used = true;
+						log.debug('array vals2', multiItem);
+						
 					}
 						  
-						  log.debug('line num', lineNumber);
+					  log.debug('line num', lineNumber);
 						  
 					  fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
@@ -251,6 +268,8 @@ function(record, search, lodash) {
 						   line: parseInt(lineNumber),
 						   value: true
 					   });	
+
+					   log.debug('after item recieve', lineNumber);
 						
 						fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
@@ -258,20 +277,31 @@ function(record, search, lodash) {
 						   line: parseInt(lineNumber),
 						   value: Math.abs(arrayItem.qtyFulfilled)
 					   }); 
+
+					   log.debug('after item qty', lineNumber)
 					   
 						fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
 						   fieldId: 'binnumbers',
 						   line: parseInt(lineNumber),
 						   value: arrayItem.binString
-					   });   				    
+					   });   
+					   
+					   log.debug('after bin', lineNumber)
 					   
 				  });
+
 				  try{	
-					var fulfillmentid = fulfillmentRecord.save();
+
+					var fulfillmentid = fulfillmentRecord.save({
+						enableSourcing: true,
+						ignoreMandatoryFields: true
+					});
+
 				  }catch(e){
 					  
 					  log.error(JSON.stringify(e.name), JSON.stringify(soItems));
+					  log.error(JSON.stringify(e.name), JSON.stringify(e));
 					
 				  }
 					log.debug('fulfillmentid', fulfillmentid);

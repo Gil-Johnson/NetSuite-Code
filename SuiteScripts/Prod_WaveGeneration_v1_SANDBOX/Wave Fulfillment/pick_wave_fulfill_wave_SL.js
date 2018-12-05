@@ -232,9 +232,10 @@ function(record, search, lodash) {
 			   }
 
 			   log.debug('soItems', JSON.stringify(soItems));
-			
+
+			    multiItem.sort();
 				if(soItems.length > 0){  
-				  _.forEach(soItems, function(arrayItem) {
+				  _.forEach(_.sortBy(soItems, ['item', 'qtyCommitted']), function(arrayItem) {
 					  
 					var lineNumber = -1;
 					
@@ -253,7 +254,10 @@ function(record, search, lodash) {
 					
 						log.debug('array vals', multiItem);
 						//look for item in multi array 
-						var newItem = _.find(multiItem, { 'item': arrayItem.item, 'used': false,'qty': arrayItem.qtyCommitted});
+						//var newItem = _.find(multiItem, {'item': arrayItem.item, 'used': false,'qty': arrayItem.qtyCommitted});
+						var newItem = _.find(multiItem, function(o) { return o.item == arrayItem.item && o.used == false && arrayItem.qtyCommitted <= o.qty; });
+
+
 						lineNumber = parseInt(newItem.index);
 						multiItem[newItem.index].used = true;
 						log.debug('array vals2', multiItem);

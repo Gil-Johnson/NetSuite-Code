@@ -98,8 +98,8 @@ function(record, search, moment, format, error) {
 		log.debug('found partial fulfillment', lineNumber);
 
 		var errObj = error.create({
-			name: 'PARTIAL_FULILLMENT_ON_SHIP_COMPLETE',
-			message: 'This order requires complete fulfillment',
+			name: 'SHIP_COMPLETE_ERROR',
+			message: 'Error - This order must be shipped complete.',
 			notifyOff: true
 		});
 

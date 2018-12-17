@@ -457,7 +457,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
           }  
 
-          if(checkbox.orders.length < 80){
+          if(checkbox.orders.length < 70){
 
             for ( var x = 0; x < checkbox.orders.length; x++ ) {
                nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
@@ -466,12 +466,20 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
                } 
            }
             else{
-              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=415&deploy=1&compid=3500213&h=70544026a635568826f1';
-              url += '&orders=' + encodeURIComponent(checkbox.orders);	
-              url += '&waveid=' + encodeURIComponent(wave_rec_id);	
-              nlapiRequestURL(url);	
-            }
 
+                var chuckedData = _.chunk(checkbox.orders, 100);
+                for (var ch = 0; ch < chuckedData.length; ch++) {
+
+                    var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=607&deploy=1&compid=3500213&h=6daf6f1bb23dfdf4b546';
+                    url += '&orders=' + encodeURIComponent(chuckedData[ch]);	
+                    url += '&waveid=' + encodeURIComponent(wave_rec_id);	
+                    nlapiRequestURL(url);	
+
+                }
+
+
+                
+            }
 
             nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
          

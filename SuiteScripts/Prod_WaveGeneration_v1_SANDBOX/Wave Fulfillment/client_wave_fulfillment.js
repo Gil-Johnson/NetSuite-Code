@@ -4,14 +4,13 @@ var css = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstra
 var d = document.createElement('div'); d.innerHTML = css; document.body.appendChild(d);
 
 jQuery( document ).ready(function() { 
+
+    
         jQuery("#custpage_fulfillwave").on("click", function(){
 
         var overlay = jQuery('<div id="overlay" style="text-align:center"> <img src="https://system.na3.netsuite.com/core/media/media.nl?id=6131728&c=3500213&h=1c8907181eecbe4158ef" height="40%" width="20%" /> </div>');
     	jQuery('body').append(overlay);  
 
-        
-
-        
          jQuery(this).prop("disabled", true);}
     ); 
 });

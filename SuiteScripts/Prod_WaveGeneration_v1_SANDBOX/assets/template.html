@@ -723,41 +723,56 @@
     window.$ = (window.NS && window.NS.jQuery) || window.jQuery;
     window.pageType = '{{ type }}';
     window.apiSuiteletUrl = '{{ apiSuiteletUrl }}';
-    
+
+
     $( document ).ready(function() {
 
         $('#warehouse').val('{{ location }}');
         $('#drop_ship').val(0);
         $('#apply_filters').click();
+        var userid = '{{ user }}';
+        var waveurl = 'https://cors.io/?https://forms.sandbox.netsuite.com/app/site/hosting/scriptlet.nl?script=509&deploy=1&compid=3500213&h=9297080e2c9f95514c3d&user='+userid;
         
-       
-      
         $( "#progrss-btn" ).click(function() {
                // alert( "Handler for .click() called." );
-                
-                setTimeout(function(){ 
-                	
-               $("#updatingwavedata").modal("show")
-                	
+   
+        setTimeout(function(){ 
+       
+          $("#updatingwavedata").modal("show");
+
+          $( ".progress-bar" ).css( "width", 85 + "%" ).attr( "aria-valuenow", 85 );
+
                 var orderCount =  $('#lastorder').val();  
-                var timeout = orderCount/4*1400
-                           
-               
-                
-                var stops = [25, 55, 85, 100];
-                $.each(stops, function(index, value){
-                    setTimeout(function(){                    	
-                        $( ".progress-bar" ).css( "width", value + "%" ).attr( "aria-valuenow", value ); 
-                        if(value == 100){
-                        	 $("#updatingwavedata").modal("hide");                        	
-                        }
-                    }, index * timeout);
-                });
-            
-                
-               
-                }, 1000);
-                
+                var timeout = orderCount*1400
+                //we store out timerIdhere
+                var timeOutId = 0;
+
+                var ajaxFn = function () {
+                        $.ajax({
+                            url: waveurl,
+                            dataType: "text",
+                            success: function (response) {
+                                console.log('response :' + response);
+                                if (response == "T") {//YAYA
+                                    console.log('clearing timeout');
+                                    clearTimeout(timeOutId);//stop the timeout
+                                    $("#updatingwavedata").modal("hide");
+                                } else {//Fail check?
+                                    timeOutId = setTimeout(ajaxFn, 10000);//set the timeout again
+                                    console.log("call");//check if this is running
+                                    //you should see this on jsfiddle
+                                    // since the response there is just an empty string
+                                }
+                            }
+                        });
+                                }
+             
+                timeOutId = setTimeout(ajaxFn, timeout);
+                 
+            }, 1000);
+
+             
+
           });
   
        

@@ -17,6 +17,7 @@ function updateSOs(request, response){
 	 var orderFilters = orders.split(",");
 	 
 	 var wave_rec_id = request.getParameter('waveid');
+	 var lastorder = request.getParameter('lastorder');
 	 
 //	 nlapiLogExecution('DEBUG', 'LogValues', orderFilters.toString());	 
 	 nlapiLogExecution('DEBUG', 'LogValues', wave_rec_id);
@@ -41,9 +42,16 @@ function updateSOs(request, response){
 	      
 	      
 	      
-	      }
+		  }
+		  
+
+		  if(lastorder == 'T'){
+			nlapiSubmitField('customrecord_wave', wave_rec_id, ['custrecord_orders_marked'] , ['T']);
+		  }
 
 	    
-	    nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
+		nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
+		
+		return 'good';
 
 }

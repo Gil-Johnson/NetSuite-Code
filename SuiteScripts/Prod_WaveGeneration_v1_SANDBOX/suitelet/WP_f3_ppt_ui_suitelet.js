@@ -76,6 +76,7 @@ var F3BaseUISuitelet = Fiber.extend(function () {
                 var standalone = standaloneParam == 'T' || standaloneParam == '1';
                 
                 var location = nlapiGetLocation();
+                var user = nlapiGetUser();
                 F3.Util.Utility.logDebug('location', location);
 
                 var suiteletScriptId = 'customscriptwp__ppt_api_suitelet';
@@ -111,6 +112,7 @@ var F3BaseUISuitelet = Fiber.extend(function () {
                 indexPageValue = indexPageValue.replace('{{ apiSuiteletUrl }}', apiSuiteletUrl);
                 indexPageValue = indexPageValue.replace(/{{ standaloneClass }}/gi, standaloneClass);
                 indexPageValue = indexPageValue.replace('{{ location }}', location);
+                indexPageValue = indexPageValue.replace('{{ user }}', user);
 
                 F3.Util.Utility.logDebug('indexPageValue', indexPageValue);
                 F3.Util.Utility.logDebug('filesInfo', JSON.stringify(templateData));

@@ -40,7 +40,7 @@ function(record, search, email, runtime, lodash, url, https) {
 
 			 //run search for all orders with a certain wave 
 			var itemsToFulfill = search.load({
-				id: 'customsearch_fulfill_wave_orders',
+				id: 'customsearch_fulfill_wave_orders',  // netsuite id 6588
 			});
 
 			itemsToFulfill.filters.push( search.createFilter({
@@ -153,7 +153,7 @@ function(record, search, email, runtime, lodash, url, https) {
 					qtyPicked = 0;
 				}
 				
-				var qtyNeeded = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
+				var qtyNeeded = Math.abs(qtyCommitted);
 
 				var itemData = checkBins(itemsToFullArray, id, qtyNeeded);
 

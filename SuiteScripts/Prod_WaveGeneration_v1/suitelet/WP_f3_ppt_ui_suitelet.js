@@ -77,6 +77,7 @@ var F3BaseUISuitelet = Fiber.extend(function () {
                 
                 var location = nlapiGetLocation();
                 F3.Util.Utility.logDebug('location', location);
+                var user = nlapiGetUser();
 
                 var suiteletScriptId = 'customscript_prod_wave_api';
                 var suiteletDeploymentId = 'customdeploy_prod_wave_api';
@@ -111,6 +112,7 @@ var F3BaseUISuitelet = Fiber.extend(function () {
                 indexPageValue = indexPageValue.replace('{{ apiSuiteletUrl }}', apiSuiteletUrl);
                 indexPageValue = indexPageValue.replace(/{{ standaloneClass }}/gi, standaloneClass);
                 indexPageValue = indexPageValue.replace('{{ location }}', location);
+                indexPageValue = indexPageValue.replace('{{ user }}', user);
 
                 F3.Util.Utility.logDebug('indexPageValue', indexPageValue);
                 F3.Util.Utility.logDebug('filesInfo', JSON.stringify(templateData));

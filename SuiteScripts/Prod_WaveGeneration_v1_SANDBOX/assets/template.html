@@ -744,6 +744,10 @@
 
                 var orderCount =  $('#lastorder').val();  
                 var timeout = orderCount*1400
+                if(orderCount < 80){
+                $("#updatingwavedata").modal("hide");
+                return;
+            }  
                 //we store out timerIdhere
                 var timeOutId = 0;
 

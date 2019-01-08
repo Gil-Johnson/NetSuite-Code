@@ -2,8 +2,26 @@
  *@NApiVersion 2.x
  *@NScriptType ClientScript
  */
-define(['N/error', 'N/ui/dialog'],
-    function(error, dialog) {
+define(['N/error', 'N/ui/dialog', 'N/record'],
+    function(error, dialog, record) {
+
+        function clearData(context) {
+
+        var billRecord = context.currentRecord;
+            
+           if(context.mode === 'copy') {
+		        	
+                billRecord.setValue({
+                    fieldId: 'custbody_is_copied',
+                    value: true,				        			   
+                    ignoreFieldChange: false
+                });	
+                
+            
+           }
+            
+              
+            }
 
         function validateLine(context) {
             var currentRecord = context.currentRecord;
@@ -38,7 +56,7 @@ define(['N/error', 'N/ui/dialog'],
         }
      
         return {
-
+            pageInit: clearData, 
             validateLine: validateLine,
            
         };

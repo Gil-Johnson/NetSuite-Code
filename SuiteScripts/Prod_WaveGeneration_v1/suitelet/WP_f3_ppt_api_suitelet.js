@@ -326,7 +326,8 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	       
         	       
         	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemtype == "Kit"){
-        	    	   
+                       
+                       nlapiLogExecution('DEBUG', 'debug itemObj', JSON.stringify(itemObj));
         	    	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
         	    	   
         	       }else{
@@ -334,7 +335,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	    	   itemJSON.push(itemObj);
         	       }
         	           
-        	     //  nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
+        	       nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
         	 	  return true;                // return true to keep iterating
         	 	  
         	   });          

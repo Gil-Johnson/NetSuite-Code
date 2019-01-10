@@ -20,6 +20,27 @@ function(record, search, email, runtime) {
      * @Since 2015.2
      */
 
+	function getNSType(ns_type){
+	  
+		//	  log.debug('ns_type', ns_type);
+				
+				if(ns_type == 'Assembly'){
+					  ns_type= record.Type.ASSEMBLY_ITEM;			   
+				   }
+				   else if(ns_type == 'InvtPart'){
+					 ns_type = record.Type.INVENTORY_ITEM;
+				   }
+				   else if (ns_type == 'Kit'){		      			   
+					 ns_type = record.Type.KIT_ITEM;		      			   
+				   }
+				  else if (ns_type == 'NonInvtPart'){		      			   
+					ns_type = record.Type.NON_INVENTORY_ITEM;		      			   
+				   } 
+				
+				return ns_type;
+				
+			}
+
 	  
 	function getBinQty(bin, item_id) {
 		
@@ -168,25 +189,53 @@ function(record, search, email, runtime) {
 		             
 		                var scrap_assembly_build = result.getValue({
 		                    name: 'custrecord_associated_assembly_build',	                    
-		                });	           
+						});	     
+						
+						var scrap_assembly_item = result.getValue({
+							join: 'custrecord_associated_assembly_build',	
+							name: 'item'                    
+						});	
+						
+						var assembly_scrap_item = search.lookupFields({
+							type: 'item',
+							id: parseInt(scrap_assembly_item),
+							columns: ['isinactive', 'type']
+						});
+
+						log.debug('assembly_scrap_item.isinactive', assembly_scrap_item.type[0].value);
+
+						var scrapItemType = getNSType(assembly_scrap_item.type[0].value)
+						
+
+						if(assembly_scrap_item.isinactive == true){
+							record.submitFields({
+			                    type: scrapItemType,
+			                    id: parseInt(scrap_assembly_item),
+			                    values: {
+			                    	isinactive : false
+			                    }
+			                });
+							
+						}
+						
 		                
 		               	if(scrap_bin){	
 		               		log.debug('in scrap bin to function',scrap_bin);
-		                  binQty = getBinQty(scrap_bin, scrap_item); 	
+		                    binQty = getBinQty(scrap_bin, scrap_item); 	
 		               	}                
 		               
 		               	log.debug('scrap_qty', scrap_qty);
 		               	log.debug('binQty', binQty);
 		             
 		                if(parseFloat(binQty) < parseFloat(scrap_qty)){	                	
-		                	
+		                	var errorMsg = 'not enough qty in bin for invenotry adjustment';
 		                	
 		                    record.submitFields({
 			                    type: 'customrecord_scrap_qty',
 			                    id: scrap_rec_id,
 			                    values: {
 			                    	custrecord_scrap_errored: true,
-			                    	custrecord_scrap_error: 'not enough qty in bin for invenotry adjustment'
+			                    	custrecord_scrap_error: errorMsg 
 			                    },
 			                    options: {
 			                        enableSourcing: false,
@@ -295,7 +344,18 @@ function(record, search, email, runtime) {
 					                });
 			            	  
 			            	   
-			              }
+						  }
+						  
+						  if(assembly_scrap_item.isinactive == true){
+							record.submitFields({
+			                    type: scrapItemType,
+			                    id: parseInt(scrap_assembly_item),
+			                    values: {
+			                    	isinactive : true
+			                    }
+			                });
+							
+						}
 			                         
 	  		                
 			               record.submitFields({

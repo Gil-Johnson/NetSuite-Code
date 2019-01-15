@@ -188,14 +188,7 @@ function(record, search) {
     	  
   	 try{
    		 
-    		var shippingMethod =  orderRecord.getValue({
-   		    fieldId: 'shipmethod'
-   		   });   		
     		
-    		log.debug('ship method', shippingMethod);
-    		
-    		if(shippingMethod == 263080){
-    			
     			var customer =  orderRecord.getValue({
     	  		    fieldId: 'entity'
     	  		});	
@@ -204,7 +197,7 @@ function(record, search) {
        	     var customerRecord = record.load({
     		    type: record.Type.CUSTOMER, 
     		    id: customer,
-    		    isDynamic: true,
+    		    isDynamic: false,
     		     }); 
        		
        	     var defaultshippingItem =  customerRecord.getValue({
@@ -220,7 +213,7 @@ function(record, search) {
        		});
        	      	      
     			
-    		}  	
+    		
     		
     	 }catch(e){    	
     		 

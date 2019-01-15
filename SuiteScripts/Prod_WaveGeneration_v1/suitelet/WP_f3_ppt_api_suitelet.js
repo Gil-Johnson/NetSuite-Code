@@ -270,13 +270,16 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	       if(!upc){	    	   
         	    	   upc = searchresult.getValue( 'upccode');
         	    	   }
-        	       
-        	       var qtyOpen = (qtyCom - qtyPicked);
-        	       if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
+                   
+                   nlapiLogExecution('AUDIT', 'aduit', 'name: ' + itemtxt + '  qtycom: '+ qtyCom);
+                   var qtyOpen = (qtyCom - qtyPicked);
+                   
+        	       if(qtyCom <= 0 && iskitmember != 'kitmbr'){	
+                    nlapiLogExecution('AUDIT', 'aduit', 'in exclude');	    	   
         	    	   excludeMembers = true;	    	   
         	       }
         	       
-        	       if(qtyOpen > 0 && iskitmember != 'kitmbr'){
+        	       if(qtyCom > 0 && iskitmember != 'kitmbr'){
         	    	   excludeMembers = false;	    	   
         	       }
         	      
@@ -291,7 +294,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         		    	   itemUpc:upc,
         		    	   itemDesc:itemDesc,
         		    	   lineId: line,
-        		    	   openQty: qtyOpen,
+        		    	   openQty: qtyCom,
         		    	   qtyCommitted: qtyCom,
         		    	   itemtype: rectype,
         		    	   allowsubs: allowSubs,

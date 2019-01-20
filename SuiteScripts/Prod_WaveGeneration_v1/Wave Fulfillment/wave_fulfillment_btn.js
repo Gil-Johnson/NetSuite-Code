@@ -26,27 +26,26 @@ function userEventBeforeLoad(type, form, request) {
         var user = nlapiGetUser();
         var role = nlapiGetRole();
         var status = nlapiGetFieldValue('custrecord_wave_fulfillment_status');
+        form.setScript('customscript_client_wave_fulfillment');
        
        
       //  nlapiLogExecution('DEBUG', 'test', 'poId: ' + poId);
  
-        var inlinehtml = form.addField('custpage_inlinehtml_fld', 'inlinehtml', 'inlinehtml', null, null);
-        nlapiSetFieldValue('custpage_inlinehtml_fld', '<script> jQuery( document ).ready(function() { jQuery("#custpage_fulfillwave").on("click", function() { jQuery(this).prop("disabled", true);}); }); </script>', null, null);
+     // var inlinehtml = form.addField('custpage_inlinehtml_fld', 'inlinehtml', 'inlinehtml', null, null);
+     // nlapiSetFieldValue('custpage_inlinehtml_fld', '<script> $.noConflict(); jQuery( document ).ready(function() { jQuery("#custpage_fulfillwave").on("click", function() { jQuery(this).prop("disabled", true);}); }); </script>', null, null);
 
-
-        // if there is a rule that means an approval request has been sent out
         if (status != 3) {
 
             nlapiLogExecution('DEBUG', 'test', 'poId: ' + recid);
             var strURL = nlapiResolveURL('SUITELET', 'customscript_pick_wave_api_sl', 'customdeploy_pick_wave_api_sl') + '&waveid=' + recid;
-            var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39);
+            var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39)  ;
             form.addButton('custpage_fulfillwave', 'Fulfill Wave', scriptbutton);
 
         }
 
         var strURL = nlapiResolveURL('SUITELET', 'customscript_search_wave_complete', 'customdeploy_search_wave_complete') + '&waveid=' + recid;
         var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39);
-        form.addButton('custpage_fulfillwave', 'Release Bins', scriptbutton);
+        form.addButton('custpage_release_bins', 'Release Bins', scriptbutton);
   
 
     }

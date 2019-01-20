@@ -3,9 +3,9 @@
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
  */
-define(['N/record',  'N/search', , '/SuiteScripts - Globals/lodash'],
+define(['N/record',  'N/search', , '/SuiteScripts - Globals/lodash', 'N/email'],
 
-function(record, search, lodash) {
+function(record, search, lodash, email) {
    
     /**
      * Definition of the Suitelet script trigger point.
@@ -24,7 +24,7 @@ function(record, search, lodash) {
 		 try{
 
 			log.debug('in suitelet', 'calling suitelet');
-			var response1 = "";
+			var response1 = "created a fulfillment";
 	    	
 	    	//retrive parameters 
 			 var orders = context.request.parameters.orders; 
@@ -84,7 +84,7 @@ function(record, search, lodash) {
 
 					Object.keys(groupedKits).forEach(function(key, index) {
 		   
-					  log.debug('key', key);
+					 // log.debug('key', key);
 					  var canFulfill = [];
 						// parent is key
 						// find the qty tryign to be fullfilled 
@@ -117,8 +117,8 @@ function(record, search, lodash) {
 							setQty = parseInt(canFulfill[0]);
 						}
 						
-
-						log.debug('canFulfill[0]', canFulfill[0]);
+						log.debug('parent Kit', key);
+						log.debug('canFulfill', canFulfill[0]);
 						log.debug('trying to fulfill', setQty);
 
 					//need to be able to fulfill at least 1 kit	
@@ -150,8 +150,8 @@ function(record, search, lodash) {
 							
 							_.forEach(item.bins, function(bin) {
 
-								log.debug('item', item.item);
-								log.debug('memNeeded', qtyToFulfill);
+								log.debug('member item', item.item);
+								log.debug('mem qty Needed', qtyToFulfill);
 
 						    if(qtyToFulfill >= 0){ //prevent overfulfillment
 								
@@ -180,9 +180,7 @@ function(record, search, lodash) {
 										}
 						
 
-									}
-		
-								   
+									} 
 	
 							});
 
@@ -197,22 +195,19 @@ function(record, search, lodash) {
 			   }
 
 			   log.debug('soItems', JSON.stringify(soItems));
-
+			   
 				if(soItems.length > 0){  
 				  _.forEach(soItems, function(arrayItem) {
 					  
-					  log.debug('item', arrayItem.item); 
-					  log.debug('bin', arrayItem.binString); 
-					  log.debug('qty', Math.abs(arrayItem.qtyCommitted)); 
-						  
-												 
+					  log.audit('item to full', 'Item: '+ arrayItem.item + ' bin str: ' + arrayItem.binString + ' qty fulfilled : ' + Math.abs(arrayItem.qtyFulfilled)); 
+										 
 						var lineNumber = fulfillmentRecord.findSublistLineWithValue({
 							sublistId: 'item',
-							fieldId: 'item',
-							value: arrayItem.item
+							fieldId: 'orderline',
+							value: arrayItem.orderline
 						 }); 
 						  
-						  log.debug('line num', lineNumber);
+						 // log.debug('line num', lineNumber);
 						  
 					  fulfillmentRecord.setSublistValue({
 						   sublistId: 'item',
@@ -233,11 +228,14 @@ function(record, search, lodash) {
 						   fieldId: 'binnumbers',
 						   line: parseInt(lineNumber),
 						   value: arrayItem.binString
-					   });   				    
+					   });  
 					   
+					
+	   
 				  });
 				  try{	
 
+		
 					var fulfillmentid = fulfillmentRecord.save({
 						enableSourcing: true,
 						ignoreMandatoryFields: true
@@ -245,7 +243,19 @@ function(record, search, lodash) {
 
 
 				  }catch(e){
-					  
+
+					 soItems.forEach(function(v){ 
+						 
+						delete v.orderid; 
+						delete v.parentId; 
+						delete v.memberQty; 
+						delete v.bins; 
+						delete v.parentQtyCom; 
+						delete v.binString; 
+					
+					});
+						  
+					 
 					  log.error(JSON.stringify(e.name), JSON.stringify(soItems));
 					  log.error('error on save fulfillment', JSON.stringify(e));
 					  response1 = JSON.stringify(e.message);

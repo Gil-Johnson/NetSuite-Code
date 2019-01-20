@@ -55,7 +55,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-				//log.debug('item bin', result.id);
+			//	log.debug('item bin', result.id);
 
 				var binnumber = result.getValue({
 					name: 'binnumber'
@@ -72,7 +72,7 @@ function(record, search, email, runtime, lodash, url, https) {
 		   });
 
 
-			//log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
+			log.debug('itemsToFullArray', JSON.stringify(itemsToFullArray));
 
 
 			//run search to pull all orders with wave
@@ -110,7 +110,7 @@ function(record, search, email, runtime, lodash, url, https) {
 	    	   	 
 				var id = result.id;
 
-			//	log.debug('result.id in order', result.id)
+				//log.debug('result.id in order', result.id)
 				
 				var itemType = result.getValue({
 					name: 'type'
@@ -119,6 +119,11 @@ function(record, search, email, runtime, lodash, url, https) {
 				var orderid = result.getValue({
 					join: 'transaction',
 					name: 'internalid'
+				});
+
+				var orderline = result.getValue({
+					join: 'transaction',
+					name: 'line'
 				});
 
 				var qty = result.getValue({
@@ -141,11 +146,11 @@ function(record, search, email, runtime, lodash, url, https) {
 				});
 
 				var qtyOpen = (qtyCommitted - qtyPicked);
-				if(qtyOpen <= 0 && iskitmember != 'kitmbr'){		    	   
+				if(qtyCommitted <= 0 && iskitmember != 'kitmbr'){		    	   
 					excludeMembers = true;	    	   
 				}
 
-				if(qtyOpen > 0 && iskitmember != 'kitmbr'){
+				if(qtyCommitted > 0 && iskitmember != 'kitmbr'){
 					excludeMembers = false;	    	   
 				}
 
@@ -153,14 +158,15 @@ function(record, search, email, runtime, lodash, url, https) {
 					qtyPicked = 0;
 				}
 				
-				var qtyNeeded = Math.abs(qtyCommitted) - Math.abs(qtyPicked);
+				var qtyNeeded = Math.abs(qtyCommitted);
 
 				var itemData = checkBins(itemsToFullArray, id, qtyNeeded);
 
 				var itemObj = {
 					item: id, 
+					orderline:orderline,
 					orderid: orderid, 
-					qtyCommitted:qtyNeeded, 
+					qtyCommitted: qtyNeeded, 
 					binString: itemData.binString, 
 					parentId: "", 
 					parentQtyCom: 0, 
@@ -279,9 +285,8 @@ function(record, search, email, runtime, lodash, url, https) {
 
 			if(qtyToFulfill >= 0){ //prevent overfulfillment
 
-				log.debug('item', id);
-				log.debug('qtyToFulfill in loop', qtyToFulfill);
-				log.debug('item.binnumber ', item.binnumber);
+				log.debug('item data', 'item:' +  id + ' qtyToFulfill: '+qtyToFulfill+ ' item.binnumber: ' + item.binnumber + ' item.binonhandavail: ' + item.binonhandavail);
+			
 				//check if bin can fulfill all quantity 
 				var avilableQty = item.binonhandavail;
 
@@ -301,6 +306,9 @@ function(record, search, email, runtime, lodash, url, https) {
 				}else{
 					itemData.binString =  item.binnumber + '(' + Math.abs(qtyFulfilled) + ')' ;
 				}
+
+
+				log.debug('itemData.binString: ' + itemData.binString);
 
 				if(qtyUnfulfilled <= 0){ // whenever picked from multiple bins qty fullfilled is wrong
 					itemData.qtyFulfilled = Math.abs(qtyNeeded);

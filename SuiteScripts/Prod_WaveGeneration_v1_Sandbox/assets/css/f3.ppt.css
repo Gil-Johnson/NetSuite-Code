@@ -163,35 +163,6 @@ input.flash-red[type="text"] {
     animation: blinker 1s linear infinite;
     color: red;
     font-weight: bold;
-&:hover {
-    background: green;
-    &:before {
-      /* ------- THIS IS THE MAGIC ----------------*/
-      content: attr(data-hover);
-      /* ------------------------------------------*/
-      display: block;
-      background: #000;
-      position: absolute;
-      top: 100%;
-      left: -7px;
-      right: -7px;
-      padding: 15px; 
-    }
-    &:after {
-      content: "";
-      position: absolute;
-      display: block;
-      width: 0;
-      height: 0;
-      border: solid 10px transparent;
-      border-bottom-color: #000;
-      bottom: 0;
-      left: 50%;
-      margin-left: -10px;
-      z-index: 2;
-    }
-  }
-  
 }
 
 .popover-content {

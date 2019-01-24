@@ -224,20 +224,11 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	
         	//nlapiLogExecution('DEBUG','SL testing' , resultSet.length );  	
         	
-        	//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
-        	  var isKit = false;
-        	  var parentVal = "";
-        	  var parentTxt = "";
-        	  var parentLine = "";
-        	  var parentQty = null;
-        	  var excludeMembers = false;
         	  var itemJSON = [];
         	  
         	  
         	  resultSet.forEachResult(function(searchresult)
         	  {
-        	
-        		  
         	       var record = searchresult.getValue('internalid');
                    var itemtype = searchresult.getValue('type');                   
                    var rectype = "";       	
@@ -251,9 +242,6 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 		               		rectype = "not found";
 		               	}          
         	       var itemtxt = searchresult.getValue( 'name');
-        	       var iskitmember = searchresult.getValue( 'formulatext');
-        	       
-        	       var itemDesc = searchresult.getValue( 'description').replace(/['"]+/g, '');
         	       var orderid = searchresult.getValue( 'internalid', 'transaction');
         	       var orderNum = searchresult.getValue( 'number', 'transaction');
         	       var customerid = searchresult.getValue( 'name', 'transaction');
@@ -261,85 +249,81 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	       var shipAddrtxt = searchresult.getValue( 'shipaddress', 'transaction');
         	       var line = searchresult.getValue( 'line', 'transaction');
         	       var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction');
-        	       var qty = searchresult.getValue( 'quantity', 'transaction');
-        	       var qtyRec = searchresult.getValue( 'quantityshiprecv', 'transaction');
-        	       var qtyPicked = searchresult.getValue( 'quantitypicked', 'transaction');
-        	       var allowSubs = searchresult.getValue( 'custbody_allow_substitutions', 'transaction');
+                   var allowSubs = searchresult.getValue( 'custbody_allow_substitutions', 'transaction');
+                   //member item fields
+                   var memberitem = searchresult.getValue('memberitem');
+                   var memberitemTxt = searchresult.getText('memberitem');
+                   var memberquantity = searchresult.getValue('memberquantity');
+                   var memberupc = searchresult.getValue( 'upc', 'memberitem');
+                   var membertype = searchresult.getValue( 'type', 'memberitem');
+                try{
+                   var itemDesc = searchresult.getValue( 'description').replace(/['"]+/g, '');
+                   var memberdescription = searchresult.getValue( 'description', 'memberitem').replace(/['"]+/g, '');
+                }catch(e){}
+
         	     //  var qtyOpen = qty - qtyRec;
         	       var upc = searchresult.getValue( 'custcol_upccode', 'transaction' );
         	       if(!upc){	    	   
         	    	   upc = searchresult.getValue( 'upccode');
-        	    	   }
+                    }
+
+                  var inArray = "";  
+
+                  if(rectype == 'assemblyitem') {
+
+                    inArray = _.find(itemJSON, { 'lineId': line, 'itemId': record });
+
+                  } 
+
+                //if item is not assebly and item is nto assembly and alreayd in array
+                if(!inArray) { 
                    
-                   nlapiLogExecution('AUDIT', 'aduit', 'name: ' + itemtxt + '  qtycom: '+ qtyCom);
-                   var qtyOpen = (qtyCom - qtyPicked);
-                   
-        	       if(qtyCom <= 0 && iskitmember != 'kitmbr'){	
-                    nlapiLogExecution('AUDIT', 'aduit', 'in exclude');	    	   
-        	    	   excludeMembers = true;	    	   
-        	       }
+                  var itemObj = {
+                        order:orderid,
+                        orderNum:orderNum,
+                        cusId:customerid,
+                        cusName:customertxt,
+                        shippingAddress:shipAddrtxt,
+                        allowsubs: allowSubs,
+                  };
+ 
+                  //need to check if it's a kit 
+                  if(memberitem && rectype == 'kititem'){
+
+                      itemObj.itemNum = memberitemTxt;
+                      itemObj.itemId= memberitem;
+                      itemObj.itemUpc = memberupc;
+                      itemObj.itemId = memberitem;
+                      itemObj.memberQty = memberquantity;
+                      itemObj.itemDesc = memberdescription;
+                      itemObj.itemtype = membertype;
+                      itemObj.openQty = memberquantity * qtyCom;
+                      itemObj.qtyCommitted = memberquantity * qtyCom;
+                      itemObj.parentId = record;
+                      itemObj.parentName = itemtxt;
+                      itemObj.parentLine = line;
+        
+                  }else {
+
+                    itemObj.itemNum=  itemtxt;
+                    itemObj.itemId = record;
+                    itemObj.itemUpc = upc;
+                    itemObj.itemDesc = itemDesc;
+                    itemObj.lineId = line;
+                    itemObj.openQty = qtyCom;
+                    itemObj.qtyCommitted = qtyCom;
+                    itemObj.itemtype = rectype;
+
+
+                  }
+                 
+                    itemJSON.push(itemObj);
+
+                }
         	       
-        	       if(qtyCom > 0 && iskitmember != 'kitmbr'){
-        	    	   excludeMembers = false;	    	   
-        	       }
-        	      
-        	       var itemObj = {
-        		    	   order:orderid,
-        		    	   orderNum:orderNum,
-        		    	   cusId:customerid,
-        		    	   cusName:customertxt,
-        		    	   shippingAddress:shipAddrtxt,
-        		    	   itemNum:itemtxt,
-        		    	   itemId:record,
-        		    	   itemUpc:upc,
-        		    	   itemDesc:itemDesc,
-        		    	   lineId: line,
-        		    	   openQty: qtyCom,
-        		    	   qtyCommitted: qtyCom,
-        		    	   itemtype: rectype,
-        		    	   allowsubs: allowSubs,
-        		    	   iskitmbr: iskitmember,
-        		//    	   parentId: null,
-        		//    	   parentName: null,
-        		//    	   parentLine: null
-        		     };
-        	       
-        	       if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
-        	    	   parentVal =  null;
-        	    	   parentTxt = null;
-        	    	   parentLine = null;
-        	       }
-        	       
-        	       if(rectype == 'kititem'){	// if item is kit set parent up    	 
-        	    	  parentVal = record;
-        	    	  parentTxt = itemtxt;
-        	    	  parentLine = line;
-        	    	  parentQty = qty;
-        	       }
-        	       
-        	       if(iskitmember == 'kitmbr' && parentVal != null){ 		    	  
-        	    	   
-        	    	// want to push parent to kit
-        	    	   itemObj['parentId'] = parentVal;
-        	    	   itemObj['parentName'] = parentTxt;
-        	    	   itemObj['parentLine'] = parentLine;
-        	    	   itemObj['memberQty'] = qty/parentQty;
-        	    	   
-        		    }     
-        	       
-        	       
-        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemtype == "Kit"){
-                       
-                       nlapiLogExecution('DEBUG', 'debug itemObj', JSON.stringify(itemObj));
-        	    	   nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
-        	    	   
-        	       }else{
-        	    	   
-        	    	   itemJSON.push(itemObj);
-        	       }
         	           
         	       nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
-        	 	  return true;                // return true to keep iterating
+        	 	   return true;                // return true to keep iterating
         	 	  
         	   });          
         	
@@ -452,7 +436,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
                nlapiLogExecution('DEBUG', 'final[i]', JSON.stringify(final[i]));
                
-              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=601&deploy=1&compid=3500213&h=6b12921842a553e620f8';
+              var url = 'https://forms.netsuite.com/app/site/hosting/scriptlet.nl?script=601&deploy=1&compid=3500213_SB1&h=b1835b3ea19893e6679f';
               url += '&orders=' + encodeURIComponent(checkbox.orders);	
               url += '&waveid=' + encodeURIComponent(wave_rec_id);	
               url += '&user=' + encodeURIComponent(checkbox.user);	
@@ -474,7 +458,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
            }
            else{
 
-            var posturl = 'https://3500213.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=609&deploy=1';
+            var posturl = 'https://3500213-sb1.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=609&deploy=1';
             posturl += '&waveid=' + encodeURIComponent(wave_rec_id);
             posturl += '&orders=' + encodeURIComponent(checkbox.orders);
 

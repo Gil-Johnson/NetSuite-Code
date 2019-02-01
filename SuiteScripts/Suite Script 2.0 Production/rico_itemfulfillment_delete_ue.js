@@ -33,12 +33,62 @@ function(error, record, search) {
      * @param {string} scriptContext.type - Trigger type
      * @Since 2015.2
      */
-    function beforeSubmit(context) {     	
-     if (context.type !== context.UserEventType.DELETE){
-    	 log.debug('context.type', context.type); 
-    	 return;
-     }   
-    	     
+    function beforeSubmit(context) {   
+
+    var fulfillment_Record = context.newRecord;
+    var fulfillmentId = fulfillment_Record.id;
+    var fulfillmentType = fulfillment_Record.type;
+        
+    if (context.type === context.UserEventType.CREATE || context.type === context.UserEventType.EDIT){
+
+        var totalParts = 0;
+        //get line count  custbody_totalparts
+        var numLines = fulfillment_Record.getLineCount({
+            sublistId: 'item'
+        });
+
+        for (var i = 0; i <= numLines-1; i++) {
+					 
+         var itemreceive = fulfillment_Record.getSublistValue({
+                sublistId: 'item',
+                fieldId: 'itemreceive',
+                line: i,
+            });	
+
+            if(itemreceive == true){
+
+                var qty = fulfillment_Record.getSublistValue({
+                    sublistId: 'item',
+                    fieldId: 'quantity',
+                    line: i,
+                });	
+
+                totalParts += parseInt(qty);
+
+            }  
+      }
+
+      log.debug('total parts', totalParts);
+
+      fulfillment_Record.setValue({
+        fieldId: 'custbody_totalparts',
+        value: parseInt(totalParts),
+        ignoreFieldChange: true
+    });
+    
+
+
+       
+        //    for(var line = 1; line <= itemCount; line++){
+     
+       
+    }
+
+    }
+
+
+   /*  if (context.type !== context.UserEventType.DELETE){
+
     	 var fulfillment_Record = context.newRecord;
        	 var fulfillmentId = fulfillment_Record.id;
        	 var fulfillmentType = fulfillment_Record.type;
@@ -97,23 +147,10 @@ function(error, record, search) {
    	     	  
   // 	  var orderRecordnew = context.newRecord;
    //	  var orderId = orderRecordnew.id;
-   	    	  
-
     }
-
-    /**
-     * Function definition to be triggered before record is loaded.
-     *
-     * @param {Object} scriptContext
-     * @param {Record} scriptContext.newRecord - New record
-     * @param {Record} scriptContext.oldRecord - Old record
-     * @param {string} scriptContext.type - Trigger type
-     * @Since 2015.2
-     */
-    function afterSubmit(scriptContext) {
-
-    }
-
+}	  
+*/
+    
     return {
       //  beforeLoad: beforeLoad,
         beforeSubmit: beforeSubmit,

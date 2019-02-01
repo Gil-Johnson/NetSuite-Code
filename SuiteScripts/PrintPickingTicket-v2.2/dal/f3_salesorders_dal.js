@@ -147,6 +147,9 @@ var SalesOrdersDAL = Fiber.extend(function () {
             if (!F3.Util.Utility.isBlankOrNull(params.team))
                 filters.push(new nlobjSearchFilter('custitem2', 'item', 'anyof', params.team));
 
+                if (!F3.Util.Utility.isBlankOrNull(params.if_win))
+                filters.push(new nlobjSearchFilter('custitem2', 'item', 'anyof', params.if_win));
+
             if (!F3.Util.Utility.isBlankOrNull(params.league))
                 filters.push(new nlobjSearchFilter('custitem1', 'item', 'anyof', params.league));
 

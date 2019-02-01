@@ -37,7 +37,8 @@ define(['N/record', 'N/error', 'N/search'],
                 type: 'customrecord_wave',
                 id: wave_rec_id,
                 values: {
-                    custrecord_orders_marked: true
+                    custrecord_orders_marked: true,
+                    custrecord_wave_status: 2
                 },
                 options: {
                     enableSourcing: false,

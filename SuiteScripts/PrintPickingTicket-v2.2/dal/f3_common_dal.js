@@ -313,6 +313,7 @@ var CommonDAL = (function () {
             var cols = [];
 
             filters.push(new nlobjSearchFilter('isinactive', null, 'is', 'F'));
+            filters.push(new nlobjSearchFilter('custrecord7', null, 'anyof', [15,9,2,1,4]));
 
             if(!!league_id) {
                 filters.push(new nlobjSearchFilter('custrecord7', null, 'anyof', [league_id]));

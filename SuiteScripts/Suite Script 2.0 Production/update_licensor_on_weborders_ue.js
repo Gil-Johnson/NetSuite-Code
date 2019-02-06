@@ -210,7 +210,24 @@ function(record, search) {
        		    fieldId: 'shipmethod',
        		    value: defaultshippingItem,
        		    ignoreFieldChange: true
-       		});
+			   });
+			   
+			   customerRecord.setValue({
+				fieldId: 'shippingitem',
+				value: defaultshippingItem,
+				ignoreFieldChange: true
+			});
+
+  try{
+			customerRecord.save({
+				enableSourcing: true,
+				ignoreMandatoryFields: true
+			});
+		}catch(e){
+
+			log.error('ERROR', JSON.stringify(e));
+		}
+
        	      	      
     			
     		

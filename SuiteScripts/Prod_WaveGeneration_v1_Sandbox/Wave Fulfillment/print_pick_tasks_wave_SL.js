@@ -1,143 +1,110 @@
 /**
  * @NApiVersion 2.x
  * @NScriptType Suitelet
- * @NModuleScope SameAccount
+ 
  */
-define(['N/record',  'N/search', 'N/email', 'N/runtime'],
+define(['N/search',
+    'N/record',
+    'N/render'
+],
+function (Search,
+    Record,
+    Render
+) {
+    // eslint-disable-line func-names
 
-function(record, search, email, runtime) {
-   
-    /**
-     * Definition of the Suitelet script trigger point.
-     *
-     * @param {Object} context
-     * @param {ServerRequest} context.request - Encapsulation of the incoming request
-     * @param {ServerResponse} context.response - Encapsulation of the Suitelet response
-     * @Since 2015.2
-     */
-    function onRequest(context) {
-    	
-	 if (context.request.method === 'GET'){	
-		 
-		//put error handling for no values===============================
+    'use strict';
 
-		 try{
-	    	
-	    	//retrive parameters 
-			 var waveid = context.request.parameters.waveid; 
-			
-			 log.debug('waveid', waveid);	
-	
+    function getResultsAndParse(waveid) {
+        var jsonObj = {};
+        
+        // Contract Info
+        waveRecord = Search.lookupFields({
+            type: 'customrecord_wave',
+            id: Math.abs(waveid),
+            columns: [
+                'name',
+            ]
+        });
 
-			 //run search for all orders with a certain wave 
-			var itemsToFulfill = search.load({
-				id: 'customsearch_system_clear_wave_bin_sr',
-			});
+        var today = new Date();
+        waveRecordJsonObj = {
+            wavename: waveRecord.name,
+            pickRecords: []
+        };
 
-			itemsToFulfill.filters.push( search.createFilter({
-				join: 'binnumber',
-				name: 'custrecord_current_wave',
-				operator: search.Operator.IS,
-				values: waveid
-			})); 
+        // Claims Info
+        pickRecordSearch = Search.create({
+            type: 'customrecord_pick_task',
+            columns: [
+                {
+                    name: 'custitem_primarybin',
+                    join: 'custrecord_pick_task_item'
+                },
+                'custrecord_pick_task_item',
+                'custrecord_wave_pick_quantity',
+            ],
+            filters: [
+            {
+                name: 'custrecord_pick_task_wave',
+                operator: Search.Operator.IS,
+                values: waveid
+            }]
+        });
 
-			var searchResult = itemsToFulfill.run().getRange({
-                start: 0,
-                end: 10
-                });
+        pickRecordSearch.run().each(function claimResults(pick) {
+            waveRecordJsonObj.pickRecords.push({
+                primarybin: pick.getValue('custitem_primarybin', 'custrecord_pick_task_item'),
+                item: pick.getValue('custrecord_pick_task_item'),
+                qty: pick.getValue('custrecord_wave_pick_quantity')
+            });
 
-			if(searchResult.length > 0){
+            return true;
+        });
 
-				context.response.write('<h2> Items are still found in the pack bins.  Please move the inventory before closing the wave. </h2>');
+        jsonObj.waveRecord = waveRecordJsonObj;
 
-			}else{
-
- 				// If no results returned
-				// Search all bins for wave number in current wave field and erase value from current wave field. custrecord_current_wave
-						
-			var binsToClear = search.load({
-				id: 'customsearch_clear_wave_from_bins',
-			});
-
-			binsToClear.filters.push( search.createFilter({
-				name: 'custrecord_current_wave',
-				operator: search.Operator.IS,
-				values: waveid
-			})); 
-
-
-			binsToClear.run().each(function(result) {
-	    	   	 
-				var id = result.id;
-
-				log.debug('item bin', result.id);
-
-				
-         try{
-
-			var objRecord = record.load({
-				type: record.Type.BIN, 
-				id: id,
-				isDynamic: true,
-			});
-
-			objRecord.setValue({
-				fieldId: 'custrecord_current_wave',
-				value: "",
-				ignoreFieldChange: true
-			});
-
-			objRecord.save();
-			
-			}catch(e){
-
-				log.error('error on record submot fopr bin', JSON.stringify(e));
-			}
-		
-				
-				
-				return true;
-			
-		   });
-
-
-				// Mark wave complete field on wave T - custrecord_wave_complete 
-				record.submitFields({
-					type: 'customrecord_wave',
-					id: waveid,
-					values: {
-						custrecord_wave_complete: true
-					},
-					options: {
-						enableSourcing: false,
-						ignoreMandatoryFields : true
-					}
-				});
-
-
-
-			}
-			
-
-			log.debug('results', JSON.stringify(searchResult.length));
-
-
-		 }catch(e){
-			 
-			 var error = log.error("error", JSON.stringify(e));
-			
-		 }
-	 		         
-	                  
-	       context.response.write('<script> window.history.back() </script>');
-	    		 
-		 	 		
-		 }
-
+        return jsonObj;
     }
 
+    function renderRecordToPdfWithTemplate(context, jsonObj) {
+
+        log.debug('in pdf function', jsonObj);
+        var renderer = Render.create();
+        renderer.setTemplateByScriptId('CUSTTMPL_113_3500213_SB1_286');
+        renderer.addCustomDataSource({
+            format: Render.DataSource.OBJECT,
+            alias: 'waverecord',
+            data: jsonObj.waveRecord
+        });
+
+        context.response.addHeader({
+            name: 'Content-Type',
+            value: 'application/pdf'
+        });
+        context.response.addHeader({
+            name: 'Content-Disposition',
+            value: 'inline'
+        });
+        context.response.addHeader({
+            name: 'Content-Disposition',
+            value: 'filename="Rico - ID: ' + jsonObj.waveRecord.wavename + ' - PickItems.pdf"'
+        });
+
+        renderer.renderPdfToResponse(context.response);
+    }
+
+    function generateContractPDF(context) {
+        var request = context.request;
+        var waveid = request.parameters.waveid;
+        log.debug('wave id', waveid);
+        var jsonObj = getResultsAndParse(parseInt(waveid));
+        log.debug('jsonObj', jsonObj);
+        renderRecordToPdfWithTemplate(context, jsonObj);
+    }
+
+
     return {
-        onRequest: onRequest
+        onRequest: generateContractPDF
     };
-    
 });

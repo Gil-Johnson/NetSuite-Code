@@ -46,6 +46,13 @@ function userEventBeforeLoad(type, form, request) {
         var strURL = nlapiResolveURL('SUITELET', 'customscript_search_wave_complete', 'customdeploy_search_wave_complete') + '&waveid=' + recid;
         var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39);
         form.addButton('custpage_release_bins', 'Release Bins', scriptbutton);
+
+if(user == 17834){
+        var printurl = nlapiResolveURL('SUITELET', 'customscript_print_pick_task_pdf', 'customdeploy_print_pick_task_pdf') + '&waveid=' + recid;
+        var	script = "window.open('"+printurl+"', '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=300,left=400,width=1200,height=700')";
+      //  var scriptbutton = 'document.location.href=' + String.fromCharCode(39) + strURL + String.fromCharCode(39);
+        form.addButton('custpage_print_wave_tasks', 'Print Pick Task', script);
+}
   
 
     }

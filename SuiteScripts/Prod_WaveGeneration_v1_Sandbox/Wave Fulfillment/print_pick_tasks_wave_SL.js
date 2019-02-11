@@ -38,8 +38,8 @@ function (Search,
             type: 'customrecord_pick_task',
             columns: [
                 {
-                    name: 'custitem_primarybin',
-                    join: 'custrecord_pick_task_item'
+                    name: 'custrecord_pick_task_bin',
+                    sort: Search.Sort.ASC
                 },
                 'custrecord_pick_task_item',
                 'custrecord_wave_pick_quantity',
@@ -49,13 +49,18 @@ function (Search,
                 name: 'custrecord_pick_task_wave',
                 operator: Search.Operator.IS,
                 values: waveid
-            }]
+            }, {
+                name: 'custrecord_pick_complete',
+                operator: Search.Operator.IS,
+                values: false
+            }
+         ]
         });
 
         pickRecordSearch.run().each(function claimResults(pick) {
             waveRecordJsonObj.pickRecords.push({
-                primarybin: pick.getValue('custitem_primarybin', 'custrecord_pick_task_item'),
-                item: pick.getValue('custrecord_pick_task_item'),
+                primarybin: pick.getText('custrecord_pick_task_bin'),
+                item: pick.getText('custrecord_pick_task_item'),
                 qty: pick.getValue('custrecord_wave_pick_quantity')
             });
 

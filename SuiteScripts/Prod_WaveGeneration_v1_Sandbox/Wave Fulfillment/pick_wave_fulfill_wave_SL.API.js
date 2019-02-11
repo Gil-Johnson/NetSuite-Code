@@ -115,6 +115,7 @@ function(record, search, email, runtime, lodash, url, https) {
 					name: 'internalid'
 				});
 
+				
 				var orderline = result.getValue({
 					join: 'transaction',
 					name: 'line'
@@ -160,7 +161,11 @@ function(record, search, email, runtime, lodash, url, https) {
 					return true;
 				}
 
-				kitMembers = _.uniqBy(kitMembers, 'line');
+				try{
+					kitMembers = _.uniqBy(kitMembers, 'line');
+				}catch(e){
+					log.error('error on _unigBy', JSON.stringify(e));
+				}
 
 				var inArray = "";  
 
@@ -177,28 +182,37 @@ function(record, search, email, runtime, lodash, url, https) {
 
 					
 					//need to check if it's a kit 
-					if(memberitem && itemType == 'Kit'){
+				if(memberitem && itemType == 'Kit'){
 
 					var qtyNeeded =  Math.abs(memberquantity)  * Math.abs(qtyCommitted);
 					var itemData = checkBins(itemsToFullArray, memberitem, qtyNeeded);
 					log.debug('kit members',  memberitem + ' qty:'+ qtyNeeded + ' kit array:' + JSON.stringify(kitMembers));
+					//search for duplicate kit member entrys and then remove them via remove_
 					var kitOrderLine =  _.find(kitMembers, { 'item': memberitem , 'qtyCommitted': Math.abs(qtyNeeded)});
-					_.remove(kitMembers, {line: kitOrderLine.line});
+					if(kitOrderLine){
+						try{
+						_.remove(kitMembers, {line: kitOrderLine.line});
+						}catch(e){
+							log.error('error on _remove', JSON.stringify(e));
+						}
+				    }
+
 					log.debug('kit members after removal', JSON.stringify(kitMembers));
 					//if found remove from array
+					  
 
-							var itemObj = {
-								item: memberitem, 
-								orderline: kitOrderLine.line,
-								orderid: orderid, 
-								qtyCommitted: qtyNeeded, 
-								binString: itemData.binString, 
-								parentId: id, 
-								parentQtyCom: qtyCommitted, 
-								memberQty: memberquantity, 
-								qtyFulfilled: itemData.qtyFulfilled,
-								bins: itemData.bins
-							};
+						var itemObj = {
+							item: memberitem, 
+							orderline: kitOrderLine.line,
+							orderid: orderid, 
+							qtyCommitted: qtyNeeded, 
+							binString: itemData.binString, 
+							parentId: id, 
+							parentQtyCom: qtyCommitted, 
+							memberQty: memberquantity, 
+							qtyFulfilled: itemData.qtyFulfilled,
+							bins: itemData.bins
+						};
 
 					}else{
 

@@ -30,7 +30,7 @@ function(record, search, lodash, email) {
 			 var orders = context.request.parameters.orders; 
 			 var ordersToFulfill = JSON.parse(orders); 
 			 
-			 log.debug('orders', JSON.stringify(orders));
+			 log.debug('orders', orders);
 
 			//need to loop through an rray of objects
 			//Object.keys(ordersToFulfill).forEach(function(key, index) {
@@ -48,12 +48,16 @@ function(record, search, lodash, email) {
 				log.debug('soItems', JSON.stringify(soItems));
 	
 				//create fulfillment record
+				try{
 				var fulfillmentRecord = record.transform({
 					   fromType: record.Type.SALES_ORDER,
 					   fromId: parseInt(arrayItem.key),
 					   toType: record.Type.ITEM_FULFILLMENT,
 					   isDynamic: false,
 				   });
+				}catch(e){
+					log.error('error on record transform', JSON.stringify(e));
+				}
 				 
 				 fulfillmentRecord.setValue({
 					   fieldId: 'shipstatus',
@@ -76,8 +80,7 @@ function(record, search, lodash, email) {
 					 
 				 }
 				 		   
-				//  log.debug('key', key);
-			  //	log.debug('index', index);	
+				
 			  
 			   //set parent kit build bin string then put back in items
 			   if(kitItems){
@@ -194,7 +197,7 @@ function(record, search, lodash, email) {
 					});
 			   }
 
-			   log.debug('soItems', JSON.stringify(soItems));
+			   log.debug('soItems2', JSON.stringify(soItems));
 			   
 				if(soItems.length > 0){  
 				  _.forEach(soItems, function(arrayItem) {

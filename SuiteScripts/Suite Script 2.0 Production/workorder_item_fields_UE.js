@@ -23,7 +23,7 @@ function(record, search, moment, format) {
         if (context.type !== context.UserEventType.CREATE)
              return;
          
-        log.debug('created fomr SO', context.type);
+       
         
         var currentRecord = context.newRecord;	
         var createdfrom = currentRecord.getValue({
@@ -230,10 +230,168 @@ function(record, search, moment, format) {
          
 	 }// end before load function 
        
+     function afterSubmit(context) {
+    	
+    	  if (context.type !== context.UserEventType.CREATE){
+              return;
+		  }
+
+		  log.debug('created fomr SO', context.type);
+	
+    	    	  
+    	  var workOrderRec = context.newRecord;
+          var workOrderId = workOrderRec.id;
+          
+          var workOrderRecord = record.load({
+            type: record.Type.WORK_ORDER, 
+            id: workOrderId,
+            isDynamic: false,
+        });
+    	
+            var createdfrom = workOrderRec.getValue({
+                fieldId: 'createdfrom'
+            });   
+            var assemblyItem = workOrderRec.getValue({
+                fieldId: 'assemblyitem'
+            }); 
+
+            if(createdfrom){
+
+                var fieldLookUp = search.lookupFields({
+    	    	    type: search.Type.TRANSACTION,
+    	    	    id: createdfrom,
+    	    	    columns: ['type', 'enddate', 'shipdate']
+                });  
+                
+               	    	
+                var type = fieldLookUp.type[0].text;
+                
+                if(type == 'Sales Order'){       	        	
+    	        	
+    	        	var soRec = record.load({
+    	        	    type: record.Type.SALES_ORDER, 
+    	        	    id: createdfrom,
+    	        	    isDynamic: true,
+    	        	});
+    	        	
+    	        	var lineNumber = soRec.findSublistLineWithValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'item',
+    	        	    value: assemblyItem
+    	        	});
+    	        
+    	        	var item_description = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'description',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var item_sku = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'custcol_custsku',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var item_retail = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'custcol_rtlprc',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var item_upc = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'custcol_upccode',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var item_inner = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'custcol_inpk',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var item_case = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'custcol_cspk',
+    	        	    line: lineNumber
+    	        	});
+    	        	
+    	        	var shipdate = soRec.getSublistValue({
+    	        	    sublistId: 'item',
+    	        	    fieldId: 'expectedshipdate',
+    	        	    line: lineNumber
+    	        	});
+
+    	        	  
+    	        	if(item_description){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_description',
+        	                value: item_description
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	        	if(item_sku){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_sku',
+        	                value: item_sku
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	        	if(item_retail){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_retailprice',
+        	                value: item_retail
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	        	if(item_upc){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_upccode',
+        	                value: item_upc
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	        	if(item_inner){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_innerpack',
+        	                value: item_inner
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	        	if(item_case){
+    	        		
+    	        		workOrderRecord.setValue({
+        	                fieldId: 'custbody_casepack',
+        	                value: item_case
+        	            });  	        		
+    	        		
+    	            	}
+    	        	
+    	       
+
+            }
+
+            workOrderRecord.save({
+    		    enableSourcing: false,
+    		    ignoreMandatoryFields: true
+    		});     
+    }
+}
 
     return {
     	
         beforeLoad: beforeLoad,
+       afterSubmit: afterSubmit
   
     };
     

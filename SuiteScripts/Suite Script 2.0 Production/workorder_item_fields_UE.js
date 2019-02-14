@@ -248,12 +248,14 @@ function(record, search, moment, format) {
             isDynamic: false,
         });
     	
-            var createdfrom = workOrderRec.getValue({
+            var createdfrom = workOrderRecord.getValue({
                 fieldId: 'createdfrom'
             });   
-            var assemblyItem = workOrderRec.getValue({
+            var assemblyItem = workOrderRecord.getValue({
                 fieldId: 'assemblyitem'
-            }); 
+			}); 
+			
+			log.debug('createdfrom', createdfrom);
 
             if(createdfrom){
 
@@ -264,7 +266,9 @@ function(record, search, moment, format) {
                 });  
                 
                	    	
-                var type = fieldLookUp.type[0].text;
+				var type = fieldLookUp.type[0].text;
+				
+				log.debug('type ', fieldLookUp.type[0].text);
                 
                 if(type == 'Sales Order'){       	        	
     	        	

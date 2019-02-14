@@ -30,10 +30,11 @@ function (Search,
         var today = new Date();
         waveRecordJsonObj = {
             wavename: waveRecord.name,
-            pickRecords: []
+            pickRecords: [],
+            shppingNotes: []
         };
 
-        // Claims Info
+        // PickTask Records Info
         pickRecordSearch = Search.create({
             type: 'customrecord_pick_task',
             columns: [
@@ -66,6 +67,38 @@ function (Search,
 
             return true;
         });
+
+        //run search for shipping instructions
+			var shippingNotes = Search.load({
+				id: 'customsearch6875',
+			});
+
+			shippingNotes.filters.push( Search.createFilter({
+				name: 'custbody_current_wave',
+				operator: Search.Operator.IS,
+				values: waveid
+            })); 
+            
+            shippingNotes.run().each(function(result) {
+	    	   	 
+                    var name = result.getText({
+                        name: 'entity',
+                        summary: Search.Summary.GROUP
+                    });
+                    
+                    var shipInstructions = result.getValue({
+                        name: 'formulatext',
+                        summary: Search.Summary.GROUP
+                    });
+                
+                    waveRecordJsonObj.shppingNotes.push({
+                        name:name,
+                        shipInstructions:shipInstructions
+                    });
+		
+				return true;
+			
+		   });
 
         jsonObj.waveRecord = waveRecordJsonObj;
 

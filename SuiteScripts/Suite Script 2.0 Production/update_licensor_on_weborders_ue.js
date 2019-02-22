@@ -187,12 +187,19 @@ function(record, search) {
     
     	  
   	 try{
-   		 
+			
+		
+		var pinref = orderRecord.getValue({
+			fieldId: 'pnrefnum'
+		  });
+		  var lastfour = orderRecord.getValue({
+			fieldId: 'ccnumber'
+		  });
     		
-    			var customer =  orderRecord.getValue({
-    	  		    fieldId: 'entity'
-    	  		});	
-    			
+		var customer =  orderRecord.getValue({
+			fieldId: 'entity'
+		});	
+		
 
        	     var customerRecord = record.load({
     		    type: record.Type.CUSTOMER, 
@@ -211,6 +218,24 @@ function(record, search) {
        		    value: defaultshippingItem,
        		    ignoreFieldChange: true
 			   });
+
+			   orderRecord.setValue({
+				fieldId: 'custbody_pin_ref',
+				value: pinref,
+				ignoreFieldChange: true
+			});
+
+			orderRecord.setValue({
+				fieldId: 'custbody_last_four_of_cc',
+				value: lastfour,
+				ignoreFieldChange: true
+			});
+
+			orderRecord.setValue({
+				fieldId: 'customform',
+				value: 89,
+				ignoreFieldChange: true
+			});
 			   
 			   customerRecord.setValue({
 				fieldId: 'shippingitem',

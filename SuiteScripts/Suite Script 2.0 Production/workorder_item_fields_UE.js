@@ -379,16 +379,65 @@ function(record, search, moment, format) {
         	                value: item_case
         	            });  	        		
     	        		
-    	            	}
+						}
+						
+						if(shipdate){
+
+
+							//var newshipdate = moment(shipdate).subtract('days', 1); 
+							var newshipdate = moment(shipdate).subtract(1, 'days');
+
+							log.debug('ship date value', newshipdate);
+							log.debug('newshipdate.day()', newshipdate.day());
+	   
+							 if (newshipdate.day() === 6 ){       	    	
+								 newshipdate = moment(newshipdate).subtract('days', 1);    	    		 
+							 } 
+							if (newshipdate.day() === 7){      	    		
+								newshipdate = moment(newshipdate).subtract('days', 2);     	    		
+							 }   
+							
+							var setShipDate = moment(newshipdate).format('MM/DD/YYYY');  
+
+							log.debug('ship date value3', newshipdate);
+							
+							 var parsedDateStringAsRawDateObject = format.parse({
+								value: setShipDate,
+								type: format.Type.DATE
+							});
+
+							try{
+								workOrderRecord.setValue({
+								fieldId: 'enddate',
+								value: parsedDateStringAsRawDateObject
+							});
+
+							log.debug('ship date 2 value', formattedDateString);
+
+							}
+							catch(e){
+
+								log.error('error on setting field', JSON.stringify(e));
+
+							}
+							
+							}
     	        	
     	       
 
-            }
+			}
+			
+			try{
 
             workOrderRecord.save({
     		    enableSourcing: false,
     		    ignoreMandatoryFields: true
-    		});     
+			});     
+
+		}catch(e){
+
+			log.error('error on record save', JSON.stringify(e));
+		}
     }
 }
 

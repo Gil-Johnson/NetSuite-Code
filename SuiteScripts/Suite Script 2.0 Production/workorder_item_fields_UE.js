@@ -384,35 +384,29 @@ function(record, search, moment, format) {
 						if(shipdate){
 
 
-							//var newshipdate = moment(shipdate).subtract('days', 1); 
-							var newshipdate = moment(shipdate).subtract(1, 'days');
+							
+							// var newshipdate = moment(shipdate).subtract(1, 'days');
 
-							log.debug('ship date value', newshipdate);
-							log.debug('newshipdate.day()', newshipdate.day());
+							// log.debug('ship date value', newshipdate);
+							// log.debug('newshipdate.day()', newshipdate.day());
 	   
-							 if (newshipdate.day() === 6 ){       	    	
-								 newshipdate = moment(newshipdate).subtract('days', 1);    	    		 
-							 } 
-							if (newshipdate.day() === 7){      	    		
-								newshipdate = moment(newshipdate).subtract('days', 2);     	    		
-							 }   
 							
-							var setShipDate = moment(newshipdate).format('MM/DD/YYYY');  
+							// var setShipDate = moment(newshipdate).format('MM/DD/YYYY');  
 
-							log.debug('ship date value3', newshipdate);
+							// log.debug('ship date value3', newshipdate);
 							
-							 var parsedDateStringAsRawDateObject = format.parse({
-								value: setShipDate,
-								type: format.Type.DATE
-							});
+							//  var parsedDateStringAsRawDateObject = format.parse({
+							// 	value: setShipDate,
+							// 	type: format.Type.DATE
+							// });
 
 							try{
 								workOrderRecord.setValue({
 								fieldId: 'enddate',
-								value: parsedDateStringAsRawDateObject
+								value:shipdate
 							});
 
-							log.debug('ship date 2 value', formattedDateString);
+							
 
 							}
 							catch(e){

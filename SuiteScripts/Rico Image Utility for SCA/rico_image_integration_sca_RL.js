@@ -19,7 +19,8 @@ function(record, search, file) {
     	var error = 'Sucessfuly Created file'; 
     	log.debug('requestBody', requestBody);
     	log.debug('requestBody', requestBody.filename);
-    	log.debug('requestBody', requestBody.filecontents);
+		log.debug('requestBody', requestBody.filecontents);
+		log.debug('minified file', requestBody.imagec);
     	
     //	return;
     	
@@ -28,16 +29,25 @@ function(record, search, file) {
     	
     		var fileObj = file.create({
     		    name: requestBody.filename,
-    		    fileType: file.Type.PNGIMAGE,
+    		    fileType: file.Type.JPGIMAGE,
     		    contents: requestBody.filecontents,
     		//    description: 'This is a plain text file.',
     		//    encoding: file.Encoding.UTF8,
-    		    folder: 4812899,
+    		    folder: parseInt(4812899),
     		    isOnline: true
     		});
     		
     	//	fileObj.folder = 3103739;
-            var id = fileObj.save();
+			var id = fileObj.save();
+			
+
+			var filetodelete = file.load({
+				id: 'Web Site Hosting Files/Live Hosting Files/Images/'+requestBody.filename.replace("jpg", "png")
+			});
+
+			file.delete({
+				id: filetodelete.id
+			});
     
     	
     	

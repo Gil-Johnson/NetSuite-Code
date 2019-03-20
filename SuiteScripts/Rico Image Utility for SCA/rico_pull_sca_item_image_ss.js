@@ -87,11 +87,11 @@ function(https, record, runtime, search, task, file) {
 	                      	
 	                        //get item details
 	                        	
-	                             var itemid = myPage.data[j].id;
+	                            var itemid = myPage.data[j].id;
 	 	        		        var itemType = myPage.data[j].recordType;	
 	        		        
 	        		        var url = myPage.data[j].getValue({
-	                            name: 'custitem_image1'
+	                            name: 'custitem_highresimage'
 	                        });   
 	        		        
 	        		        log.debug('itemid', itemid);
@@ -118,7 +118,7 @@ function(https, record, runtime, search, task, file) {
 				                    type: itemType, 
 				                    id: itemid,
 				                    values: {
-				                    	custitem_pulled_sca_image: true
+				                    	custitem_pulled_high_res: true
 				          
 				                    },
 				                    options: {

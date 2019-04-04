@@ -3,13 +3,13 @@
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
  */
-define(['N/error', 'N/record', 'N/search'],
+define(['N/error', 'N/record', 'N/search', 'N/runtime', 'N/email'],
 /**
  * @param {error} error
  * @param {record} record
  * @param {search} search
  */
-function(error, record, search) {
+function(error, record, search, runtime, email) {
    
     /**
      * Function definition to be triggered before record is loaded.
@@ -25,7 +25,7 @@ function(error, record, search) {
         var binid = "";
 
         var binsearch = search.load({
-            id: 'customsearch6879',
+            id: 'customsearch7163',
         });
 
         binsearch.filters.push( search.createFilter({
@@ -47,11 +47,17 @@ function(error, record, search) {
 
     function afterSubmit(context) {
 
+        
+try{
 
         if (context.type === context.UserEventType.DELETE){
             log.debug('context.type', context.type); 
             return;
         }   
+
+        log.debug('context.type', context.type); 
+       
+       
                 
             var assembly_build = context.newRecord;
             var assembly_build_Id = assembly_build.id;
@@ -61,17 +67,31 @@ function(error, record, search) {
                 fieldId: 'createdfrom'
             });
         
+      
             var tranText = assembly_build.getText({
                 fieldId: 'createdfrom'
             });
+        
+            if(!tranText){
+                return;
+            }
 
             var binnumbers = assembly_build.getValue({
                 fieldId: 'binnumbers'
             });
 
-            var binnumbersArray = binnumbers.split(",");
+            var binnumbersArray = ""
+            
+            if(binnumbers.indexOf('(') > -1){
 
+                binnumbersArray = binnumbers.split("(");
 
+            }else{
+
+                binnumbersArray =   binnumbers.split(",");
+
+            }
+            
             log.debug('binnumbers', binnumbersArray[0]);
    
             //ensure we have a work order associated with the assemblybuild
@@ -82,13 +102,20 @@ function(error, record, search) {
                     id: woId,
                     columns: ['createdfrom']
                 });  
+
+                if(!wofieldLookUp.createdfrom[0].text){
+                    return;
+                }
                
               //check if we have a sale sorder with the work order
               if(wofieldLookUp.createdfrom[0].text.indexOf('Sales Order') > -1)  {
 
+                log.debug('binnumbersArray[0] v 2', binnumbersArray[0]);
                 var binid = getBinId(binnumbersArray[0]);
+                log.debug('binid', JSON.stringify(binid));
+                
 
-                log.debug('values', JSON.stringify(wofieldLookUp));
+                log.debug('wofieldLookUp', JSON.stringify(wofieldLookUp));
                   
                 var soRecord = record.load({
                     type: record.Type.SALES_ORDER, 
@@ -103,7 +130,9 @@ function(error, record, search) {
                         value: woId
                     });
 
-                    log.debug('values', JSON.stringify(lineNumber));
+                    log.debug('line number', JSON.stringify(lineNumber));
+
+                    log.debug('binid', JSON.stringify(binid));
 
                     soRecord.setSublistValue({
                         sublistId: 'item',
@@ -112,10 +141,16 @@ function(error, record, search) {
                         value: binid
                     });	
 
+                    try{
+
                 soRecord.save({
                     enableSourcing: true,
                     ignoreMandatoryFields: true
                 });
+            }catch(e){
+
+                log.error(error.name, JSON.stringify(e));
+            }
 
                //set assembly build bin on line of sales order
 
@@ -124,6 +159,9 @@ function(error, record, search) {
               
             }
             
+        } catch (e) {
+        
+        } 
         
 
     }

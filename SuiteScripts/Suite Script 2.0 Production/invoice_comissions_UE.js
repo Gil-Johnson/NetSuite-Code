@@ -27,9 +27,10 @@ function(record, search) {
 
         var new_invoice_Record = context.newRecord; 
         var invoiceId = new_invoice_Record.id;
+        var recType = new_invoice_Record.type;
 
         var invoiceRecord = record.load({
-            type: record.Type.INVOICE, 
+            type: recType, 
             id: invoiceId,
             isDynamic: false,
         });

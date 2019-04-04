@@ -3,12 +3,12 @@
  * @NScriptType MapReduceScript
  * @NModuleScope SameAccount
  */
-define(['N/record', 'N/search'],
+define(['N/record', 'N/search', 'N/file'],
 /**
  * @param {record} record
  * @param {search} search
  */
-function(record, search) {
+function(record, search, file) {
    
     /**
      * Marks the beginning of the Map/Reduce process and generates input data.
@@ -58,8 +58,10 @@ function(record, search) {
     function map(context) {
     	
     	log.debug('data' , context.value);
-    	var item = JSON.parse(context.value);
-    //	log.debug('values', item.id);
+        var item = JSON.parse(context.value);
+        
+
+    	log.debug('trying for item id', item.values.itemid);
     	
     	
    // 	var nsType = getNSType(item.values.type.value);
@@ -84,6 +86,7 @@ function(record, search) {
 
         log.debug('numLines', numLines);
 
+       
         if(numLines == 0){
 
             itemRecord.setValue({
@@ -93,6 +96,14 @@ function(record, search) {
             });
 
         }else{
+             //if there is a file obtain the name to load the file and get the url
+           
+
+            itemRecord.setValue({
+                fieldId:'custitem_highresimage',
+                value: 'http://www.ricoincsca.com/Images/' + item.values.itemid + '_main.jpg' ,
+                ignoreFieldChange: true
+            });
 
             itemRecord.setValue({
                 fieldId:'custitem_missing_sca_image',

@@ -217,22 +217,13 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         
             
             var search = nlapiLoadSearch('item', 'customsearch5126');
-            nlapiLogExecution('AUDIT', 'aduit search  length', search.length);
-
         	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
         	search.addFilter(newFilter);
                 	
         	var resultSet = search.runSearch();
         	
-        	nlapiLogExecution('AUDIT','AUDIT resultSet.length' , resultSet.length );  	
+        	//nlapiLogExecution('DEBUG','SL testing' , resultSet.length );  	
         	
-        	//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
-        	  var isKit = false;
-        	  var parentVal = "";
-        	  var parentTxt = "";
-        	  var parentLine = "";
-        	  var parentQty = null;
-        	  var excludeMembers = false;
         	  var itemJSON = [];
         	  
         	  
@@ -341,7 +332,11 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
         	      // nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
         	 	  return true;                // return true to keep iterating
         	 	  
-        	   });          
+               });      
+               
+               
+               //pull all kit items and run another search for them
+               
         	
         	  
           	  var JSONobj = {	
@@ -361,8 +356,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             var columns = new Array();
             columns[0] = new nlobjSearchColumn( 'created');
             columns[1] = new nlobjSearchColumn( 'custrecord_wave_increment');        
-            var waveRecords = nlapiSearchRecord( 'customrecord_wave', 'customsearch3886', null, columns );       
-            nlapiLogExecution('AUDIT', 'aduit waveRecords.length', waveRecords.length ); 
+            var waveRecords = nlapiSearchRecord( 'customrecord_wave', 'customsearch3886', null, columns );        
             var wave_name = 'WV_';
             var wave_increment = 0;
             var date = new Date();            
@@ -453,7 +447,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
                nlapiLogExecution('DEBUG', 'final[i]', JSON.stringify(final[i]));
                
-              var url = 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=601&deploy=1&compid=3500213&h=6b12921842a553e620f8';
+              var url = 'https://forms.netsuite.com/app/site/hosting/scriptlet.nl?script=601&deploy=1&compid=3500213_SB1&h=b1835b3ea19893e6679f';
               url += '&orders=' + encodeURIComponent(checkbox.orders);	
               url += '&waveid=' + encodeURIComponent(wave_rec_id);	
               url += '&user=' + encodeURIComponent(checkbox.user);	
@@ -475,7 +469,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
            }
            else{
 
-            var posturl = 'https://3500213.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=609&deploy=1';
+            var posturl = 'https://3500213-sb1.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=609&deploy=1';
             posturl += '&waveid=' + encodeURIComponent(wave_rec_id);
             posturl += '&orders=' + encodeURIComponent(checkbox.orders);
 

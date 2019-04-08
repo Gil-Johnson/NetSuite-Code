@@ -108,7 +108,7 @@ function runsearch(searchId, classes) {
 	    
 	    nlapiLogExecution('DEBUG', 'classObj', JSON.stringify(classObj));
 	      
-	    soRec = nlapiLoadRecord('salesorder', record);
+	    soRec = nlapiLoadRecord(rectype, record);
 	    
 	    var lineIndex = soRec.findLineItemValue('item', 'line', searchresult.getValue( 'line' ));	    
 	    soRec.setLineItemValue('item', 'class', lineIndex, classObj.id);

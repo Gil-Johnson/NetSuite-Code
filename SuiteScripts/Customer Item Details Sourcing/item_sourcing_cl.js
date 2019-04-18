@@ -391,7 +391,7 @@ function clientValidateLine(type) {
         var lineUpcCode = nlapiGetCurrentLineItemValue('item', COMMON.UPC_ID);
         
         if(isValidValue(lineItemId)){
-            nlapiSetCurrentLineItemValue('item', COMMON.REQ_REPROCESS_ID, requireReprocessing(lineItemId, lineRetailPrice,lineUpcCode));
+         //   nlapiSetCurrentLineItemValue('item', COMMON.REQ_REPROCESS_ID, requireReprocessing(lineItemId, lineRetailPrice,lineUpcCode));
             nlapiSetCurrentLineItemValue('item', COMMON.SPECIAL_PACKING_ID, specialPackaging(lineItemId, lineInnerPack, lineCasePack));
         }
         //alert('line validate');
@@ -444,7 +444,6 @@ function overwriteGovernanceLimit(){
  */
 function clientRecalc(type){
     //if(type=='item')alert('recalc');
-    var customLabel = nlapiGetFieldValue('custbody_reqcustlabelformat');
     var totalCount = parseInt(nlapiGetFieldValue(COMMON.TOTAL_LINEITEMS_ID));
     var totalLines = parseInt(nlapiGetLineItemCount('item'));
     var difference = totalLines - totalCount;
@@ -491,7 +490,7 @@ function clientRecalc(type){
                         alert('error line num '+i + ' ERROR: ' + ex.message);
                     }
                 }
-                sourceLineItemRelcalc(customerId, itemArr, totalCount+1, totalLines, customLabel);
+                sourceLineItemRelcalc(customerId, itemArr, totalCount+1, totalLines);
             }
 
             setTotalLineItems();

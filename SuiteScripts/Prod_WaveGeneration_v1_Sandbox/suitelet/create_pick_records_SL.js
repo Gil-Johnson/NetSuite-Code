@@ -14,13 +14,10 @@ function createPickRecords(request, response)
 		
 //	var itemFilters = _.map(items, 'itemId');
 //	var itemFilters = items.map( function(obj) { return obj.itemId; } );
-  var itemFilters = [];
-		for (var key in items) {
-			
-				itemFilters.push(key);
-			
-		}
-	
+		var itemFilters = [];
+		items.forEach(function (arrayItem) {
+			itemFilters.push(arrayItem.itemId);
+		});	
 //	var itemFilters = items.map('itemId');
 
  //   nlapiLogExecution('DEBUG','orderFilters',  orderFilters.toString());
@@ -82,26 +79,30 @@ function createPickRecords(request, response)
 	
 	// for (var j = 0; j < items.length; j++)	
 	// {
-	for (var key in items) {
-		if (items.hasOwnProperty(key)) {
+		items.forEach(function (arrayItem) {
+	
 		
 		var binToUse = "";
 		//nlapiLogExecution('DEBUG','items' , JSON.stringify(items[j]) ); 	   
-		nlapiLogExecution('DEBUG','item id' , key );  
+		nlapiLogExecution('DEBUG','item id' , arrayItem.itemId );  
 			//var preferredbin = _.find(itemSearching, { 'item': itemId, 'preferredbin': 'T'});		
 			//var preferredbin = _.find(itemSearching, {'item': itemId});	
 		try{
+
+
 			//select perferred bin or bin with highest Target CO2's to record setup
-	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === key && item.preferredbin === 'T';});
+	      var preferredbin = _.find(itemSearching,  function(item){ return item.item === arrayItem.itemId && item.preferredbin === 'T';});
 		   nlapiLogExecution('DEBUG','preferredbin' , JSON.stringify(preferredbin) ); 
-		  
-		       if(preferredbin){	
+				if(arrayItem.mtoBin){
+					binToUse = arrayItem.mtoBin;
+				}
+		       else if (preferredbin){	
 
 				binToUse = preferredbin.bin;
 		    		  	    	   	    	   
 		       }else{
 
-					var preBin2 = _.find(itemSearching,  function(item){ return item.item === key});
+					var preBin2 = _.find(itemSearching,  function(item){ return item.item === arrayItem.itemId});
 					binToUse = preBin2.bin;
 	          
 			   }
@@ -110,16 +111,16 @@ function createPickRecords(request, response)
 				nlapiLogExecution('error', 'error searching for bin', JSON.stringify(e));
 			}
 			   
-			   nlapiLogExecution('DEBUG', 'item bin values', "item: " + key + "  bin: " + binToUse);      
+			   nlapiLogExecution('DEBUG', 'item bin values', "item: " + arrayItem.itemId + "  bin: " + binToUse);      
 			
 	
 		    try{
 
 				//create wave pick record	
 				var rec = nlapiCreateRecord('customrecord_pick_task');
-				rec.setFieldValue('custrecord_pick_task_item', key);
-				rec.setFieldValue('custrecord_wave_pick_quantity', parseFloat(items[key]));
-				rec.setFieldValue('custrecord_wave_pick_qty_remaining', parseFloat(items[key]));
+				rec.setFieldValue('custrecord_pick_task_item', arrayItem.itemId);
+				rec.setFieldValue('custrecord_wave_pick_quantity', parseFloat(arrayItem.qtyCommitted));
+				rec.setFieldValue('custrecord_wave_pick_qty_remaining', parseFloat(arrayItem.qtyCommitted));
 				rec.setFieldValue('custrecord_pick_task_wave', waveid); 
 				 
 				try{
@@ -157,8 +158,8 @@ function createPickRecords(request, response)
 
 				
 				
-	} 
-} 
+	
+			});	
 	
 }
 

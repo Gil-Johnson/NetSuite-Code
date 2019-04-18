@@ -87,7 +87,7 @@ function(https, record, runtime, search, task, file) {
 	                      	
 	                        //get item details
 	                        	
-	                            var itemid = myPage.data[j].id;
+	                             var itemid = myPage.data[j].id;
 	 	        		        var itemType = myPage.data[j].recordType;	
 	        		        
 	        		        var url = myPage.data[j].getValue({

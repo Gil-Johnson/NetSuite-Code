@@ -242,7 +242,7 @@ function sourceLineItem(customerId,itemId,line){
         }
 
         nlapiSetLineItemValue('item', COMMON.SPECIAL_PACKING_ID, line, specialPackaging(itemId, innerPack, casePack));
-        nlapiSetLineItemValue('item', COMMON.REQ_REPROCESS_ID, line, requireReprocessing(itemId, retailPrice,altUpc));
+      //  nlapiSetLineItemValue('item', COMMON.REQ_REPROCESS_ID, line, requireReprocessing(itemId, retailPrice,altUpc));
     }
     
     var tempSku = nlapiGetLineItemValue('item', 'custcol_custsku', line);
@@ -402,7 +402,8 @@ function specialPackaging(itemId, innerPack, casePack){
         return 'F';
 }
 
-function sourceLineItemCsvOrWebservice(customerId, itemIdArray, customLabel){
+function sourceLineItemCsvOrWebservice(customerId, itemIdArray){
+
     var context = nlapiGetContext().getExecutionContext();
 
     // searching criteria for fliter
@@ -447,7 +448,6 @@ function sourceLineItemCsvOrWebservice(customerId, itemIdArray, customLabel){
         nlapiLogExecution('DEBUG', 'Line Item: '+line, line);
         // current line item fields data
         var lineItemId = nlapiGetLineItemValue('item', 'item', line);
-        var lineItemName = nlapiGetLineItemText('item', 'item', line);
         var lineInnerPack = nlapiGetLineItemValue('item', COMMON.INNER_PACK_ID, line);
         var lineCasePack = nlapiGetLineItemValue('item', COMMON.CASE_PACK_ID, line);
         var lineRetailPrice = nlapiGetLineItemValue('item', COMMON.RETAIL_PRICE_ID, line);
@@ -662,13 +662,9 @@ function sourceLineItemCsvOrWebservice(customerId, itemIdArray, customLabel){
         lineUpcCode = returnEmptyForNull(nlapiGetLineItemValue('item', COMMON.UPC_ID, line));
         
         var sp = (itemInnerPack!=lineInnerPack || itemCasePack!=lineCasePack)?'T':'F';
-      //  var rr = (itemRetailPrice!=lineRetailPrice || itemUpcCode!=lineUpcCode)?'T':'F';
-
+        var rr = (itemRetailPrice!=lineRetailPrice || itemUpcCode!=lineUpcCode)?'T':'F';
         nlapiSetLineItemValue('item', COMMON.SPECIAL_PACKING_ID, line, sp);
-
-         if(customLabel == true || lineItemName.endsWith("-h") || lineRetailPrice&& (itemRetailPrice!=lineRetailPrice) || lineUpcCode && (itemUpcCode!=lineUpcCode) || lineSku && (lineSku !=  custSku)){
-            nlapiSetLineItemValue('item', COMMON.REQ_REPROCESS_ID, line, 'T');
-         }
+        nlapiSetLineItemValue('item', COMMON.REQ_REPROCESS_ID, line, rr);
     
         setCommissionPercent_sourcing(line);
         setRyltyPercent_webOrCsv(customerId, result[itemIndex], line, customerCat);// passing item object
@@ -755,8 +751,7 @@ function setLineValuesFromItem(itemId, line){
 }
 
 // source line items with bulk search
-
-function sourceLineItemRelcalc(custId,itemIdArray, startingLine, totalLines, customLabel){
+function sourceLineItemRelcalc(custId,itemIdArray, startingLine, totalLines){
     // get vales from item record
     var itemResult = nlapiSearchRecord('item', null, 
         [
@@ -793,7 +788,6 @@ function sourceLineItemRelcalc(custId,itemIdArray, startingLine, totalLines, cus
         
     for(var line = startingLine;line<=totalLines;line++){
         var item = nlapiGetLineItemValue('item', 'item', line);
-        var itemName = nlapiGetLineItemText('item', 'item', line);
         var itemIndex = getItemRecIndex(item, itemResult);
         if(itemIndex != -1){
             // get and set the dufault value of item
@@ -859,14 +853,12 @@ function sourceLineItemRelcalc(custId,itemIdArray, startingLine, totalLines, cus
             var lineCasePack = nlapiGetLineItemValue('item', COMMON.CASE_PACK_ID, line);
             var lineRetailPrice = nlapiGetLineItemValue('item', COMMON.RETAIL_PRICE_ID, line);
             var lineAltUpc = nlapiGetLineItemValue('item', COMMON.UPC_ID, line);
-            var lineSku = nlapiGetLineItemValue('item', COMMON.CUSTOMER_SKU_ID, line);
             
             if(lineInnerPack != innerPack || lineCasePack != casePack)
                 nlapiSetLineItemValue('item', COMMON.SPECIAL_PACKING_ID, line, 'T');
             
-            if(customLabel == true || itemName.endsWith("-h") || lineRetailPrice && (lineRetailPrice != retailPrice) || lineAltUpc && (lineAltUpc != altUpc) || lineSku && (lineSku !=  custSku)){
+            if(lineRetailPrice != retailPrice || lineAltUpc != altUpc)
                 nlapiSetLineItemValue('item', COMMON.REQ_REPROCESS_ID, line, 'T');
-            }
         }
         
         var tempSku = nlapiGetLineItemValue('item', COMMON.CUSTOMER_SKU_ID, line);

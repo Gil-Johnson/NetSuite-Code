@@ -28,7 +28,6 @@ function(record, search, email, runtime, lodash, url, https) {
 			 var orderid = context.request.parameters.id; 
 			 var itemsToFullArray = []; 
 			 var ordersToFullfillArray = [];
-			 var kitMembers = [];
 			 var index = 0;
 
 			 log.debug('waveid', waveid);	
@@ -99,23 +98,29 @@ function(record, search, email, runtime, lodash, url, https) {
 				}
 
 		//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
+			var isKit = false;
+			var parentVal = "";
+			var parentTxt = "";
+			var parentLine = "";
+			var parentQty = null;
+			var excludeMembers = false;
 
 
 			ordersToFullfill.run().each(function(result) {
 	    	   	 
-				var id = result.id;		
+				var id = result.id;
+
+				//log.debug('result.id in order', result.id)
+				
 				var itemType = result.getValue({
 					name: 'type'
 				});
-
-				log.debug('item types', itemType);
 
 				var orderid = result.getValue({
 					join: 'transaction',
 					name: 'internalid'
 				});
 
-				
 				var orderline = result.getValue({
 					join: 'transaction',
 					name: 'line'
@@ -131,111 +136,75 @@ function(record, search, email, runtime, lodash, url, https) {
 					name: 'quantitycommitted'
 				});
 
+				var qtyPicked = result.getValue({
+					join: 'transaction',
+					name: 'quantitypicked'
+				});
+
 				var iskitmember = result.getValue({
 					name: 'formulatext'
 				});
 
-				var memberitem = result.getValue({
-					name: 'memberitem'
-				});
-				var memberquantity  = result.getValue({
-					name: 'memberquantity'
-				});
-				var membertype  = result.getValue({
-					name: 'membertype'
-				});
-					
-				//if it a kitmbr from fromula put in a new array with orderline item and qtycommited
-				if(iskitmember == 'kitmbr'){
-					//push to kitMembers 
-				
-					kitMembers.push({
-						item: id,
-						qtyCommitted: Math.abs(qtyCommitted),
-						line: orderline,
-					
-					});
-
-					log.debug('is kit member', id);
-					//dont know if this . will work
-					return true;
+				var qtyOpen = (qtyCommitted - qtyPicked);
+				if(qtyCommitted <= 0 && iskitmember != 'kitmbr'){	
+					excludeMembers = true;	    	   
 				}
 
-				try{
-					kitMembers = _.uniqBy(kitMembers, 'line');
-				}catch(e){
-					log.error('error on _unigBy', JSON.stringify(e));
+				if(qtyCommitted > 0 && iskitmember != 'kitmbr'){
+					excludeMembers = false;	    	   
 				}
 
-				var inArray = "";  
-
-				if(itemType == 'Assembly') {
-
-				  inArray = _.find(ordersToFullfillArray, {'orderline': orderline, 'item': id, 'orderid': orderid});
-
-				} 
-
-				log.debug('is kit member', id + ' iskitmember: '+ iskitmember);
-			
-				//exclude assembly members
-				if(!inArray) { 
-
-					
-					//need to check if it's a kit 
-				if(memberitem && itemType == 'Kit'){
-
-					var qtyNeeded =  Math.abs(memberquantity)  * Math.abs(qtyCommitted);
-					var itemData = checkBins(itemsToFullArray, memberitem, qtyNeeded);
-					log.debug('kit members',  memberitem + ' qty:'+ qtyNeeded + ' kit array:' + JSON.stringify(kitMembers));
-					//search for duplicate kit member entrys and then remove them via remove_
-					var kitOrderLine =  _.find(kitMembers, { 'item': memberitem , 'qtyCommitted': Math.abs(qtyNeeded)});
-					if(kitOrderLine){
-						try{
-						_.remove(kitMembers, {line: kitOrderLine.line});
-						}catch(e){
-							log.error('error on _remove', JSON.stringify(e));
-						}
-				    }
-
-					log.debug('kit members after removal', JSON.stringify(kitMembers));
-					//if found remove from array
-					  
-
-						var itemObj = {
-							item: memberitem, 
-							orderline: kitOrderLine.line,
-							orderid: orderid, 
-							qtyCommitted: qtyNeeded, 
-							binString: itemData.binString, 
-							parentId: id, 
-							parentQtyCom: qtyCommitted, 
-							memberQty: memberquantity, 
-							qtyFulfilled: itemData.qtyFulfilled,
-							bins: itemData.bins
-						};
-
-					}else{
-
-						var qtyNeeded =  Math.abs(qtyCommitted);
-						var itemData = checkBins(itemsToFullArray, id, qtyNeeded);
-
-						var itemObj = {
-							item: id, 
-							orderline:orderline,
-							orderid: orderid, 
-							qtyCommitted: qtyNeeded, 
-							binString: itemData.binString, 
-							qtyFulfilled: itemData.qtyFulfilled,
-							bins: itemData.bins
-						};
-
-					}
+				if(!qtyPicked){
+					qtyPicked = 0;
+				}
 				
+				var qtyNeeded = Math.abs(qtyCommitted);
+
+				var itemData = checkBins(itemsToFullArray, id, qtyNeeded);
+
+				var itemObj = {
+					item: id, 
+					orderline:orderline,
+					orderid: orderid, 
+					qtyCommitted: qtyNeeded, 
+					binString: itemData.binString, 
+					parentId: "", 
+					parentQtyCom: 0, 
+					memberQty: 0, 
+					qtyFulfilled: itemData.qtyFulfilled,
+					bins: itemData.bins
+				};
+			  
+				if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
+					parentVal =  null;
+					parentTxt = null;
+					parentLine = null;
+				}
+				
+				if(itemType == 'Kit'){	// if item is kit set parent up    	 
+				   parentVal = id;
+				   parentQty = qty;
+				}
+				
+				if(iskitmember == 'kitmbr' && parentVal != null){ 		    	  
+					
+				 // want to push parent to kit
+					itemObj['parentId'] = parentVal;
+					itemObj['memberQty'] = qty/parentQty;
+					itemObj['parentQtyCom'] = parentQty;
+				
+				 }     
+				
+				
+				if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemType == "Kit"){
+					
+					log.audit('item data obj', JSON.stringify(itemObj));
+					log.audit('item is excluded', 'item:' +  id);
+					
+				}else{
 
 					if(itemData.binString){
-
 					  ordersToFullfillArray.push(itemObj);
-
 					}
 
 				}
@@ -274,7 +243,7 @@ function(record, search, email, runtime, lodash, url, https) {
 				log.debug('orders chuncked' + i , JSON.stringify(chuckedData[i]));
 
                                            
-				https.post({url: 'https://forms.netsuite.com/app/site/hosting/scriptlet.nl?script=602&deploy=1&compid=3500213_SB1&h=7e567987d2c02cc5677f', body: parameters});
+				https.post({url: 'https://forms.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=602&deploy=1&compid=3500213&h=92969a82260a9609e499', body: parameters});
 
 	          }  
 

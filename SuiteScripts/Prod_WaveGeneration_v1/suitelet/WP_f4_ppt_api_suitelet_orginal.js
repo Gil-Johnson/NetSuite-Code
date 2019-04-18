@@ -214,107 +214,135 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             F3.Util.Utility.logDebug('finalsubmittingdata', JSON.stringify(checkboxData));            
             F3.Util.Utility.logDebug('salesorders', JSON.stringify(checkbox.orders));
             
-            var search = nlapiLoadSearch('item', 'customsearch7252');
+        
+            
+            var search = nlapiLoadSearch('item', 'customsearch5126');
+            nlapiLogExecution('AUDIT', 'aduit search  length', search.length);
+
         	var newFilter = new nlobjSearchFilter('internalid', 'transaction', 'anyOf', checkbox.orders);
         	search.addFilter(newFilter);
                 	
         	var resultSet = search.runSearch();
         	
-        	//nlapiLogExecution('DEBUG','SL testing' , resultSet.length );  	
+        	//nlapiLogExecution('AUDIT','AUDIT resultSet.length' , resultSet.length );  	
         	
-              var itemJSON = [];
-      	    
+        	//algo to check if parent is kit if so is next kit member stop adding parent when the next item is not kit parent 
+        	  var isKit = false;
+        	  var parentVal = "";
+        	  var parentTxt = "";
+        	  var parentLine = "";
+        	  var parentQty = null;
+        	  var excludeMembers = false;
+        	  var itemJSON = [];
+        	  
+        	  
         	  resultSet.forEachResult(function(searchresult)
         	  {
-        	       var record = searchresult.getValue('internalid', null, 'group');
-                   var itemtype = searchresult.getValue('type', null, 'group');                   
-                   var itemtxt = searchresult.getValue( 'name', null, 'group');
-
-                   var mtoBin = searchresult.getValue( 'custcol_mto_bin', 'transaction', 'group');
-        	       var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction', 'sum');
-              
-                  var itemObj = {
-    
-                        itemNum:  itemtxt,
-                        itemId : record,
-                        qtyCommitted : qtyCom,
-                        itemtype : itemtype,
-                        mtoBin : mtoBin,
-
-                    }
-      
-                    itemJSON.push(itemObj);
-
-        	       nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
-        	 	   return true;                // return true to keep iterating
-        	 	  
-               });       
-               
-               nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
-
-               var kitArray = _.filter(itemJSON, { 'itemtype': 'Kit'});
-               nlapiLogExecution('DEBUG','json data kitArray' , JSON.stringify(kitArray));
-               
-               //pull all kit memebrs out nd run kit memmber search
-               var nonKitArray = _.filter(itemJSON, function(o) { return o.itemtype != 'Kit'; });
-               nlapiLogExecution('DEBUG','json data nonKitArray' , JSON.stringify(nonKitArray)); 
-
-               var kitsArray = kitArray.map(function (obj) {
-                return obj.itemId;
-              });
-
-              nlapiLogExecution('DEBUG','kitArray.length' , kitArray.length); 
-
-              if(kitArray.length >= 1){
-
-                nlapiLogExecution('DEBUG','inside search' , 'in search'); 
-
-                // run search woth kits as the filter
-                var kitsearch = nlapiLoadSearch('item', 'customsearch7253');
-                var newFilter = new nlobjSearchFilter('internalid', null, 'anyOf', kitsArray);
-                kitsearch.addFilter(newFilter);
-                var kitresultSet = kitsearch.runSearch();
-
-                kitresultSet.forEachResult(function(searchresult)
-                {
-                     var record = searchresult.getValue('internalid');                  
-                     var itemtxt = searchresult.getValue( 'name');
-                     var memberitem = searchresult.getValue( 'memberitem');
-                     var memberquantity = searchresult.getValue( 'memberquantity');
-
-                     nlapiLogExecution('DEBUG','itemtxt for kit' , itemtxt); 
-                    
-                    //look in kitArray find parent qty// kits will nto have mto bins
-                    var parent = _.find(kitArray, {'itemId': record , 'mtoBin': ""});
-
-                    //found parent get qty com and * by member qty 
-                    var memQty = parseInt(parent.qtyCommitted) * parseInt(memberquantity);
-                    
-                    //then look in array for member if member not in array push if it is add it
-                    var itemInArray = _.find(nonKitArray, {'itemId': memberitem});
-
-                    if(!itemInArray){
-
-                        nonKitArray.push({
-                            itemId : memberitem,
-                            qtyCommitted : memQty,
+        	       var record = searchresult.getValue('internalid');
+                   var itemtype = searchresult.getValue('type');                   
+                   var rectype = "";       	
+		               	if(itemtype == "Assembly"){               		
+		               		rectype = "assemblyitem";               		
+		               	}else if (itemtype == "Kit" ){             		
+		               		rectype = "kititem";              		
+		               	}else if (itemtype == "InvtPart"){               		
+		               		rectype = "invenotryitem";               		
+		               	}else{               		
+		               		rectype = "not found";
+		               	}          
+        	       var itemtxt = searchresult.getValue( 'name');
+        	       var iskitmember = searchresult.getValue( 'formulatext');
+        	       
+        	       var itemDesc = searchresult.getValue( 'description').replace(/['"]+/g, '');
+        	       var orderid = searchresult.getValue( 'internalid', 'transaction');
+        	       var orderNum = searchresult.getValue( 'number', 'transaction');
+        	       var customerid = searchresult.getValue( 'name', 'transaction');
+        	       var customertxt = searchresult.getText( 'name', 'transaction');
+        	       var shipAddrtxt = searchresult.getValue( 'shipaddress', 'transaction');
+        	       var line = searchresult.getValue( 'line', 'transaction');
+        	       var qtyCom = searchresult.getValue( 'quantitycommitted', 'transaction');
+        	       var qty = searchresult.getValue( 'quantity', 'transaction');
+        	       var qtyRec = searchresult.getValue( 'quantityshiprecv', 'transaction');
+        	       var qtyPicked = searchresult.getValue( 'quantitypicked', 'transaction');
+        	       var allowSubs = searchresult.getValue( 'custbody_allow_substitutions', 'transaction');
+        	     //  var qtyOpen = qty - qtyRec;
+        	       var upc = searchresult.getValue( 'custcol_upccode', 'transaction' );
+        	       if(!upc){	    	   
+        	    	   upc = searchresult.getValue( 'upccode');
+        	    	   }
+                   
+                //   nlapiLogExecution('AUDIT', 'aduit', 'name: ' + itemtxt + '  qtycom: '+ qtyCom);
+                   var qtyOpen = (qtyCom - qtyPicked);
+                   
+        	       if(qtyCom <= 0 && iskitmember != 'kitmbr'){	
+                  //  nlapiLogExecution('AUDIT', 'aduit', 'in exclude');	    	   
+        	    	   excludeMembers = true;	    	   
+        	       }
+        	       
+        	       if(qtyCom > 0 && iskitmember != 'kitmbr'){
+        	    	   excludeMembers = false;	    	   
+        	       }
+        	      
+        	       var itemObj = {
+        		    	   order:orderid,
+        		    	   orderNum:orderNum,
+        		    	   cusId:customerid,
+        		    	   cusName:customertxt,
+        		    	   shippingAddress:shipAddrtxt,
+        		    	   itemNum:itemtxt,
+        		    	   itemId:record,
+        		    	   itemUpc:upc,
+        		    	   itemDesc:itemDesc,
+        		    	   lineId: line,
+        		    	   openQty: qtyCom,
+        		    	   qtyCommitted: qtyCom,
+        		    	   itemtype: rectype,
+        		    	   allowsubs: allowSubs,
+        		    	   iskitmbr: iskitmember,
+        		//    	   parentId: null,
+        		//    	   parentName: null,
+        		//    	   parentLine: null
+        		     };
+        	       
+        	       if(iskitmember != 'kitmbr'){	//if item is not a kit member 	      	
+        	    	   parentVal =  null;
+        	    	   parentTxt = null;
+        	    	   parentLine = null;
+        	       }
+        	       
+        	       if(rectype == 'kititem'){	// if item is kit set parent up    	 
+        	    	  parentVal = record;
+        	    	  parentTxt = itemtxt;
+        	    	  parentLine = line;
+        	    	  parentQty = qty;
+        	       }
+        	       
+        	       if(iskitmember == 'kitmbr' && parentVal != null){ 		    	  
+        	    	   
+        	    	// want to push parent to kit
+        	    	   itemObj['parentId'] = parentVal;
+        	    	   itemObj['parentName'] = parentTxt;
+        	    	   itemObj['parentLine'] = parentLine;
+        	    	   itemObj['memberQty'] = qty/parentQty;
+        	    	   
+        		    }     
+        	       
+        	       
+        	       if((iskitmember == 'kitmbr' && parentVal == null)|| excludeMembers == true || itemtype == "Kit"){
                        
-                        });
-
-                    }else{
-
-                        itemInArray.qtyCommitted = parseInt(itemInArray.qtyCommitted) + parseInt(memQty);
-
-                    }
-                    
-                      return true;                
-                     
-                 });
-                }
-
-
-                 nlapiLogExecution('DEBUG','json nonKitArray 2 - finial' , JSON.stringify(nonKitArray) ); 
-  
+                     //  nlapiLogExecution('DEBUG', 'debug itemObj', JSON.stringify(itemObj));
+        	    	 //  nlapiLogExecution('DEBUG', 'debug', 'dont add assembly members');
+        	    	   
+        	       }else{
+        	    	   
+        	    	   itemJSON.push(itemObj);
+        	       }
+        	           
+        	      // nlapiLogExecution('DEBUG','json data' , JSON.stringify(itemJSON) ); 
+        	 	  return true;                // return true to keep iterating
+        	 	  
+        	   });          
+        	
         	  
           	  var JSONobj = {	
           			  
@@ -333,7 +361,8 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             var columns = new Array();
             columns[0] = new nlobjSearchColumn( 'created');
             columns[1] = new nlobjSearchColumn( 'custrecord_wave_increment');        
-            var waveRecords = nlapiSearchRecord( 'customrecord_wave', 'customsearch3886', null, columns );        
+            var waveRecords = nlapiSearchRecord( 'customrecord_wave', 'customsearch3886', null, columns );       
+           // nlapiLogExecution('AUDIT', 'aduit waveRecords.length', waveRecords.length ); 
             var wave_name = 'WV_';
             var wave_increment = 0;
             var date = new Date();            
@@ -382,11 +411,44 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
             
             var context1 = nlapiGetContext(); 
 
-            var pickedarr = _.map(nonKitArray, function(o) { return _.pick(o, 'itemId' , 'qtyCommitted', 'mtoBin'); });
-            
-            var final = _.chunk(pickedarr, 30); 
+            var pickItems = _.pullAllBy(itemJSON, [{ 'qtyCommitted': "" }, { 'qtyCommitted': 0 }, { 'qtyCommitted': null }], 'qtyCommitted');
+            nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
+            //sum all items     
+             pickItems = pickItems.reduce(function (c, v) {
+                c[v.itemId] = (c[v.itemId] || 0) + parseInt(v.qtyCommitted);
+                return c;
+              }, {});
 
-            for (var i = 0; i < final.length; i++) {                           
+            //  //remove items with 0 or null committed quantities 
+            //   Object.keys(pickItems).forEach(function (key) {
+            //     return pickItems[key] == null || pickItems[key] == 0 && delete pickItems[key];
+            //   });
+
+             // nlapiLogExecution('DEBUG', 'pickItems', JSON.stringify(pickItems));
+              //chunck object and send it in pieces of 30
+                 //   var values = Object.values(pickItems);
+                    var values = Object.keys(pickItems).map(function(key) {
+                        return pickItems[key];
+                    });
+                    var final = [];
+                    var counter = 0;
+                    var portion = {};
+
+                    for (var key in pickItems) {
+                    if (counter !== 0 && counter % 30 === 0) {
+                        final.push(portion);
+                        portion = {};
+                    }
+                    portion[key] = values[counter];
+                    counter++
+                    }
+                    final.push(portion);
+
+                    nlapiLogExecution('DEBUG', 'final', JSON.stringify(final));
+
+
+            for (var i = 0; i < final.length; i++) {
+                                          
                var data = JSON.stringify(final[i]);
 
                nlapiLogExecution('DEBUG', 'final[i]', JSON.stringify(final[i]));

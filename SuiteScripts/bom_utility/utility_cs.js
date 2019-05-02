@@ -11,7 +11,7 @@
  * Constants used in this utility
  */
 var Constants = {
-	MainScriptURL: "https://system.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=62&deploy=1",
+	MainScriptURL: "https://3500213.app.netsuite.com/app/site/hosting/scriptlet.nl?script=62&deploy=1",
     Setting: {
         LoggingEnabled: false, //Log messages on console
         ShowAssocItem: false //Show associated items on UI for the selected item

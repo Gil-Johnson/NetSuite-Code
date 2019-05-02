@@ -222,15 +222,20 @@ function(record, currentRecord, search) {
     		    sublistId: 'item',
     		    fieldId: 'custcol_requiresreprocessing',
     		    value: true,
-    		    ignoreFieldChange: true
-    		});
+                ignoreFieldChange: true
+                
+                
+            });
+            
+            alert('meet conditions');
     		
         	}else{
+                alert('did not meet conditions set rp to false');
 
                 crRecord.setCurrentSublistValue({
                     sublistId: 'item',
                     fieldId: 'custcol_requiresreprocessing',
-                    value: true,
+                    value: false,
                     ignoreFieldChange: false
                 });
 

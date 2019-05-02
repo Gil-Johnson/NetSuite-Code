@@ -10,8 +10,8 @@
 //check form customization, Custom Code Tab
 
 var Constants = {
-    netsuiteUrl: "https://system.na3.netsuite.com",
-    bundleUrl: "https://system.na3.netsuite.com/c.3500213/suitebundle707072/",
+    netsuiteUrl: "https://3500213.app.netsuite.com",
+    bundleUrl: "https://3500213.app.netsuite.com/c.3500213/suitebundle707072/",
     transactionBodyFields: {
         //Linked with Work Order
         remainingQty: 'custbody_remainingqty'
@@ -121,7 +121,7 @@ function clientPageInitForAssemblyBuilt(type) {
 
     var s = document.createElement("script");
     s.type = "text/javascript";
-    s.src = "https://system.na3.netsuite.com/core/media/media.nl?id=274&c=3500213&h=772ea8cf72cd6f459a02&_xt=.js";
+    s.src = "https://3500213.app.netsuite.com/core/media/media.nl?id=274&c=3500213&h=772ea8cf72cd6f459a02&_xt=.js";
     // Use any selector
     jQuery("head").append(s);
 

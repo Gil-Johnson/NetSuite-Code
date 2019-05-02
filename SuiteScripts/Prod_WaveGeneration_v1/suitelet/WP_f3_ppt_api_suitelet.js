@@ -421,7 +421,7 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
                 account: '3500213',
                 email: 'gjohnson@ricoinc.com',
                 password: 'r5;NvcbuRR',
-                role: '18'
+                role: '1027'
             }
 
             var headers = {"User-Agent-x": "SuiteScript-Call",

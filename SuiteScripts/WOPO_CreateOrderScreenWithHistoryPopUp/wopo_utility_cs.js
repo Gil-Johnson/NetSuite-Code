@@ -12,13 +12,13 @@
  */
 var wopoCsConstants = {
     ApiUrls: {
-        searchTransactions: "https://system.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=searchTransactions",
-        getTeamsByLeagueIds: "https://system.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=getTeamsByLeagueIds",
-        processItems: "https://system.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=processItems",
-        noImageUrl: "https://system.na3.netsuite.com/core/media/media.nl?id=383929&c=3500213&h=39c5fe363c1150fe692d",
-        printRecord: "https://system.na3.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=printRecord",
-        order_0: "https://system.na3.netsuite.com/app/accounting/transactions/workord.nl?id=",
-        order_1: "https://system.na3.netsuite.com/app/accounting/transactions/purchord.nl?id="
+        searchTransactions: "https://3500213.app.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=searchTransactions",
+        getTeamsByLeagueIds: "https://3500213.app.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=getTeamsByLeagueIds",
+        processItems: "https://3500213.app.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=processItems",
+        noImageUrl: "https://3500213.app.netsuite.com/core/media/media.nl?id=383929&c=3500213&h=39c5fe363c1150fe692d",
+        printRecord: "https://3500213.app.netsuite.com/app/site/hosting/scriptlet.nl?script=93&deploy=1&method=printRecord",
+        order_0: "https://3500213.app.netsuite.com/app/accounting/transactions/workord.nl?id=",
+        order_1: "https://3500213.app.netsuite.com/app/accounting/transactions/purchord.nl?id="
     },
     RecordType: {
         "0": "work order",
@@ -1404,7 +1404,7 @@ function progressDownloading(isDone) {
     else {
 
         $("body").append("<div class='ui-widget-overlay custom-busy' style='width:2000px;height:2000px'><img " +
-            "src='https://system.na3.netsuite.com/core/media/media.nl?id=328980&c=3500213&h=32302175e46c0a2e4c3f' " +
+            "src='https://3500213.app.netsuite.com/core/media/media.nl?id=328980&c=3500213&h=32302175e46c0a2e4c3f' " +
             "style='left:30%;top:15%;width:5%;position:absolute;' /></div>");
     }
 }

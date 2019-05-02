@@ -205,7 +205,7 @@ function addCustomHtml(form) {
 function handlePostRequest(req, resp) {
     var outResponse = {
         Version: Wopo_Suitelet_Constants.ApiVersion,
-        Status: Wopo_Suitelet_Constants.TransactionType.Ok
+        Status: 'OK'//Wopo_Suitelet_Constants.TransactionType.Ok
     };
     try {
         var context = nlapiGetContext();

@@ -14,7 +14,7 @@
  * F3_PPT_ class that has the actual functionality of suitelet.
  * All business logic will be encapsulated in this class.
  */
-var F3BaseAPISuitelet = Fiber.extend(function () {
+var F3BaseAPISuitelet = Fiber.extend(function () { 
 
     'use strict';
 
@@ -400,18 +400,23 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
           }  
 
-          if(checkbox.orders.length < 80){
+        //   if(checkbox.orders.length < 80){
 
-            for ( var x = 0; x < checkbox.orders.length; x++ ) {
-               nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
-               nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
+        //     for ( var x = 0; x < checkbox.orders.length; x++ ) {
+        //        try{ 
+        //        nlapiSubmitField('salesorder', checkbox.orders[x], ['custbody_current_wave', 'custbody_cleared_wave'] , [wave_rec_id, wave_rec_id]);
+        //        nlapiLogExecution('DEBUG', 'remaining usage' + x, context1.getRemainingUsage());
+        //        }catch(e){
+
+        //         nlapiLogExecution('ERROR', 'ERROR on update', JSON.stringify(e) );
+        //        }
              
-               }
-              // update to wave rec 
-               nlapiSubmitField('customrecord_wave', wave_rec_id, ['custrecord_orders_marked'] , ['T']);
+        //        }
+        //       // update to wave rec 
+        //        nlapiSubmitField('customrecord_wave', wave_rec_id, ['custrecord_orders_marked'] , ['T']);
                
-           }
-           else{
+        //    }
+        //    else{
 
             var posturl = 'https://3500213.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=609&deploy=1';
             posturl += '&waveid=' + encodeURIComponent(wave_rec_id);
@@ -432,10 +437,11 @@ var PPTAPISuitelet = F3BaseAPISuitelet.extend(function(base){
 
             nlapiRequestURL(posturl, null, headers);
  
-        } 
+      //  } 
 
 
-            nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
+           // nlapiLogExecution('DEBUG', 'remaining usage', context1.getRemainingUsage());
+            nlapiLogExecution('DEBUG', 'ending script', 'ending script');
          
 
             return 'pending';
